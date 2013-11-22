@@ -32,7 +32,7 @@ class Program(object):
             return _command
 
     def _generate_command(self, func, *args, **kwargs):
-        argspec = inspect.getargspec(func)
+        self.argspec = argspec = inspect.getargspec(func)
         argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults),
                             fillvalue=_POSITIONAL())
         cmd_help, all_args = analyze_func(func, argspec.varargs, argz)
@@ -47,7 +47,12 @@ class Program(object):
     def execute(self, args):
         arg_map = self.parser.parse_args(args).__dict__
         command = arg_map.pop(self._DISPATCH_TO)
-        return command(**arg_map)
+        real_args = []
+        for arg in self.argspec.args:
+            real_args.append(arg_map.pop(arg))
+        if arg_map and arg_map.get(self.argspec.varargs):
+            real_args.append(arg_map.pop(self.argspec.varargs))
+        return command(*real_args)
 
     def __call__(self):
         self.execute(sys.argv[1:])
@@ -77,7 +82,7 @@ def analyze_func(func, varargs_name, argz):
     if varargs_name:
         kwargs = {'nargs': '*'}
         if varargs_name in params:
-            kwargs['help'] = params[varargs_name]
+            kwargs['help'] = params[varargs_name][1]
         all_args.append(((varargs_name,), kwargs))
     return docstring, all_args
 
