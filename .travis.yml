@@ -9,7 +9,4 @@ install:
     - pip install -r test_requirements.pip
 script:
     - make cov
-after_succes:
     - coveralls
-notifications:
-    email: false
