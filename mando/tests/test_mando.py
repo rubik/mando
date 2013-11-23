@@ -1,6 +1,6 @@
 import unittest
 from paramunittest import parametrized
-from mando import command, parse
+from mando import command, parse, Program
 from mando.core import action_by_type, fix_dashes, find_param_docs
 
 
@@ -89,17 +89,22 @@ class TestFindParamDocs(unittest.TestCase):
 ### Program() tests
 ###############################################################################
 
-@command
+program = Program('example.py', '1.0.10')
+
+@program.command
 def goo(pos, verbose=False, bar=None):
     pass
 
 
-@command
+@program.command
 def vara(pos, foo, spam=24, *vars):
+    '''
+    :param vars: Yeah, you got it right, the variable arguments.
+    '''
     pass
 
 
-@command
+@program.command
 def another(baw, owl=42, json=False, tomawk=None):
     '''This yet another example showcasing the power of Mando!
 
@@ -110,6 +115,17 @@ def another(baw, owl=42, json=False, tomawk=None):
     pass  # (Obviously)
 
 
+@program.command('alias')
+def analiased(a, b=4):
+    pass
+
+
+@program.command
+def power(x, y=2):
+    return int(x) ** y
+#TODO: Add the version of power() without casting to int()
+
+
 @parametrized(
     ('goo 2', ['2', False, None]),
     ('goo 2 --verbose', ['2', True, None]),
@@ -117,7 +133,12 @@ def another(baw, owl=42, json=False, tomawk=None):
     ('goo 2 --verbose --bar 8', ['2', True, '8']),
     ('vara 2 3', ['2', '3', 24]),
     ('vara 2 3 --spam 8', ['2', '3', 8]),
+    # Unfortunately this is an argparse "bug". See:
+    # http://bugs.python.org/issue15112
+    # You cannot intermix positional and optional arguments for now.
     #('vara 1 2 --spam 8 9 8', ['1', '2', 8, '9', '8']),
+    ('vara 1 2 4 5 --spam 8', ['1', '2', 8, '4', '5']),
+    ('vara --spam 8 1 2 4 5', ['1', '2', 8, '4', '5']),
     ('vara 9 8 1 2 3 4', ['9', '8', 24, '1', '2', '3', '4']),
     ('another 2', ['2', 42, False, None]),
     ('another 2 -j', ['2', 42, True, None]),
@@ -125,14 +146,31 @@ def another(baw, owl=42, json=False, tomawk=None):
     ('another 2 --owl 89 --tomawk 98', ['2', 89, False, '98']),
     ('another 2 --json -o 1', ['2', 1, True, None]),
     ('another 3 --owl 8 --json --tomawk 8', ['3', 8, True, '8']),
+    ('alias 5 -b 9', ['5', 9], 'analiased'),
 )
 class TestGenericCommands(unittest.TestCase):
 
-    def setParameters(self, args, to_args):
+    def setParameters(self, args, to_args, real_name=None):
         self.args = args.split()
         self.to_args = to_args
+        self.real_name = real_name
 
     def testParsing(self):
-        parsed = parse(self.args)
-        self.assertEqual(self.args[0], parsed[0].__name__)
+        name = self.args[0] if self.real_name is None else self.real_name
+        parsed = program.parse(self.args)
+        self.assertEqual(name, parsed[0].__name__)
         self.assertEqual(self.to_args, parsed[1])
+
+
+@parametrized(
+    ('power 2', 4),
+    ('power 2 -y 4', 16),
+)
+class TestProgramExecute(unittest.TestCase):
+
+    def setParameters(self, args, result):
+        self.args = args.split()
+        self.result = result
+
+    def testExecute(self):
+        self.assertEqual(self.result, program.execute(self.args))

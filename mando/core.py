@@ -4,7 +4,7 @@ import inspect
 import argparse
 try:
     from itertools import izip_longest
-except ImportError:
+except ImportError:  # pragma: no cover
     from itertools import zip_longest as izip_longest
 
 
@@ -33,10 +33,10 @@ class Program(object):
                 return self._generate_command(func, *args, **kwargs)
             return _command
 
-    def _generate_command(self, func, *args, **kwargs):
-        name = func.__name__
+    def _generate_command(self, func, name=None, *args, **kwargs):
+        name = func.__name__ if name is None else name
         argspec = inspect.getargspec(func)
-        self.argspecs[name] = argspec
+        self.argspecs[func.__name__] = argspec
         argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults),
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
@@ -64,7 +64,7 @@ class Program(object):
         command, a = self.parse(args)
         return command(*a)
 
-    def __call__(self):
+    def __call__(self):  # pragma: no cover
         self.execute(sys.argv[1:])
 
 
@@ -82,7 +82,7 @@ def analyze_func(func, varargs_name, argz):
             if not is_positional:
                 args = fix_dashes(args)
         elif not is_positional:
-            args = ['--{0}'.format(k)]
+            args = fix_dashes([k])
         else:
             args = [k]
         if not is_positional:
