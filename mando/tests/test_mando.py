@@ -1,6 +1,7 @@
 import unittest
 from paramunittest import parametrized
-from mando.core import Program, action_by_type, fix_dashes, find_param_docs
+from mando import command, parse
+from mando.core import action_by_type, fix_dashes, find_param_docs
 
 
 @parametrized(
@@ -82,3 +83,56 @@ class TestFindParamDocs(unittest.TestCase):
 
     def testFunc(self):
         self.assertEqual(self.params, find_param_docs(self.doc))
+
+
+###############################################################################
+### Program() tests
+###############################################################################
+
+@command
+def goo(pos, verbose=False, bar=None):
+    pass
+
+
+@command
+def vara(pos, foo, spam=24, *vars):
+    pass
+
+
+@command
+def another(baw, owl=42, json=False, tomawk=None):
+    '''This yet another example showcasing the power of Mando!
+
+    :param baw: That's the positional argument, obviously.
+    :param -o, --owl: Yeah, I know, this is too much.
+    :param -j, --json: In case you want to pipe it through something.
+    :param -t, --tomawk: Well, in this case -t isn't for time.'''
+    pass  # (Obviously)
+
+
+@parametrized(
+    ('goo 2', ['2', False, None]),
+    ('goo 2 --verbose', ['2', True, None]),
+    ('goo 2 --bar 9', ['2', False, '9']),
+    ('goo 2 --verbose --bar 8', ['2', True, '8']),
+    ('vara 2 3', ['2', '3', 24]),
+    ('vara 2 3 --spam 8', ['2', '3', 8]),
+    #('vara 1 2 --spam 8 9 8', ['1', '2', 8, '9', '8']),
+    ('vara 9 8 1 2 3 4', ['9', '8', 24, '1', '2', '3', '4']),
+    ('another 2', ['2', 42, False, None]),
+    ('another 2 -j', ['2', 42, True, None]),
+    ('another 2 -t 1 -o 3', ['2', 3, False, '1']),
+    ('another 2 --owl 89 --tomawk 98', ['2', 89, False, '98']),
+    ('another 2 --json -o 1', ['2', 1, True, None]),
+    ('another 3 --owl 8 --json --tomawk 8', ['3', 8, True, '8']),
+)
+class TestGenericCommands(unittest.TestCase):
+
+    def setParameters(self, args, to_args):
+        self.args = args.split()
+        self.to_args = to_args
+
+    def testParsing(self):
+        parsed = parse(self.args)
+        self.assertEqual(self.args[0], parsed[0].__name__)
+        self.assertEqual(self.to_args, parsed[1])

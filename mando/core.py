@@ -23,6 +23,7 @@ class Program(object):
             self.parser.add_argument('-v', '--version', action='version',
                                      version=version)
         self.subparsers = self.parser.add_subparsers()
+        self.argspecs = {}
 
     def command(self, *args, **kwargs):
         if len(args) == 1 and hasattr(args[0], '__call__'):
@@ -33,11 +34,14 @@ class Program(object):
             return _command
 
     def _generate_command(self, func, *args, **kwargs):
-        self.argspec = argspec = inspect.getargspec(func)
+        name = func.__name__
+        argspec = inspect.getargspec(func)
+        self.argspecs[name] = argspec
         argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults),
                             fillvalue=_POSITIONAL())
+        argz = reversed(list(argz))
         cmd_help, all_args = analyze_func(func, argspec.varargs, argz)
-        subparser = self.subparsers.add_parser(func.__name__,
+        subparser = self.subparsers.add_parser(name,
                                                description=cmd_help or None,
                                                **kwargs)
         for a, kw in all_args:
@@ -45,15 +49,20 @@ class Program(object):
         subparser.set_defaults(**{self._DISPATCH_TO: func})
         return func
 
-    def execute(self, args):
+    def parse(self, args):
         arg_map = self.parser.parse_args(args).__dict__
         command = arg_map.pop(self._DISPATCH_TO)
+        argspec = self.argspecs[command.__name__]
         real_args = []
-        for arg in self.argspec.args:
+        for arg in argspec.args:
             real_args.append(arg_map.pop(arg))
-        if arg_map and arg_map.get(self.argspec.varargs):
-            real_args.append(arg_map.pop(self.argspec.varargs))
-        return command(*real_args)
+        if arg_map and arg_map.get(argspec.varargs):
+            real_args.extend(arg_map.pop(argspec.varargs))
+        return command, real_args
+
+    def execute(self, args):
+        command, a = self.parse(args)
+        return command(*a)
 
     def __call__(self):
         self.execute(sys.argv[1:])
@@ -61,7 +70,7 @@ class Program(object):
 
 def analyze_func(func, varargs_name, argz):
     doc = (inspect.getdoc(func) or '').strip()
-    params = find_param_docs(normalize_spaces(doc))
+    params = find_param_docs(doc)
     docstring = PARAM_RE.sub('', doc).rstrip()
     all_args = []
     for k, v in argz:

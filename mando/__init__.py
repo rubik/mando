@@ -5,4 +5,5 @@ __version__ = '0.1'
 
 main = Program()
 command = main.command
+parse = main.parse
 execute = main.execute
