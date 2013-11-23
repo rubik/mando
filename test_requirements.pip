@@ -1,3 +1,4 @@
 python-coveralls
 paramunittest
 coverage
+tox
