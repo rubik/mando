@@ -16,7 +16,7 @@ setup(name='mando',
       description='Create Python CLI apps with little to no effort at all!',
       platforms='any',
       long_description=readme,
-      py_modules=['mando'],
+      packages=['mando', 'mando.tests'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
