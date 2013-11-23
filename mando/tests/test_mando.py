@@ -42,10 +42,10 @@ class TestFixDashes(unittest.TestCase):
         self.assertEqual(self.result, list(fix_dashes(self.opts)))
 
 
-a_1 = {'a_param': (['a-param'], 'Short story.\n')}
-a_1_1 = {'a_param': (['a_param'], 'Short story.\n')}
-a_2 = {'j': (['-j'], 'Woow\n')}
-a_3 = {'noun': (['-n', '--noun'], 'cat\n')}
+a_1 = {'a_param': (['a-param'], 'Short story.')}
+a_1_1 = {'a_param': (['a_param'], 'Short story.')}
+a_2 = {'j': (['-j'], 'Woow')}
+a_3 = {'noun': (['-n', '--noun'], 'cat')}
 a_all = {}
 for a in (a_1, a_2, a_3):
     a_all.update(a)
@@ -60,7 +60,7 @@ for a in (a_1, a_2, a_3):
     dict(doc='''
          Some short text here and there.
 
-         :param well: water''', params={'well': 'water\n'}),
+         :param well: water''', params={'well': (['well'], 'water')}),
     dict(doc='''
          :param a-param: Short story.
          :param -j: Woow
@@ -72,7 +72,7 @@ for a in (a_1, a_2, a_3):
              Bob were just two little farmers.
          ''', params={'long_story': (['long-story'], 'A long storey belive me:'
                                      ' when all started, Adam and Bob were '
-                                     'just two little farmers.\n')}),
+                                     'just two little farmers.')}),
 )
 class TestFindParamDocs(unittest.TestCase):
 

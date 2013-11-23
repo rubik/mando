@@ -60,8 +60,8 @@ class Program(object):
 
 
 def analyze_func(func, varargs_name, argz):
-    doc = (inspect.getdoc(func) or '').strip() + '\n'
-    params = find_param_docs(re.sub(r'[\r\t ]+', ' ', doc))
+    doc = (inspect.getdoc(func) or '').strip()
+    params = find_param_docs(normalize_spaces(doc))
     docstring = PARAM_RE.sub('', doc).rstrip()
     all_args = []
     for k, v in argz:
@@ -88,7 +88,13 @@ def analyze_func(func, varargs_name, argz):
     return docstring, all_args
 
 
+def normalize_spaces(string):
+    return re.sub(r'[\r\t\n ]+', ' ', string)
+
+
 def find_param_docs(docstring):
+    if not docstring.endswith('\n'):
+        docstring = docstring + '\n'
     paramdocs = {}
     for match in PARAM_RE.finditer(docstring):
         name = match.group(2)
@@ -97,7 +103,9 @@ def find_param_docs(docstring):
             name = max(opts, key=len).lstrip('-').replace('-', '_')
         elif len(opts) == 1:
             name = opts[0].lstrip('-')
-        paramdocs[name] = (opts, match.group(3).rstrip())
+        # Sanitize name (because Python variables can't contain dashes)
+        name = name.replace('-', '_')
+        paramdocs[name] = (opts, normalize_spaces(match.group(3)).rstrip())
     return paramdocs
 
 
