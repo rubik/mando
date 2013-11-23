@@ -5,8 +5,6 @@ import argparse
 from itertools import izip_longest
 
 
-__version__ = '0.1'
-
 _POSITIONAL = type('_positional', (object,), {})
 PARAM_RE = re.compile(r"^([\t ]*):param (.*?): ([^\n]*\n(\1[ \t]+[^\n]*\n)*)",
                                             re.MULTILINE)
@@ -91,7 +89,7 @@ def find_param_docs(docstring):
     paramdocs = {}
     for match in PARAM_RE.finditer(docstring):
         name = match.group(2)
-        opts = map(str.strip, name.split(','))
+        opts = list(map(str.strip, name.split(',')))
         if len(opts) == 2:
             name = max(opts, key=len).lstrip('-').replace('-', '_')
         elif len(opts) == 1:
@@ -118,10 +116,8 @@ def get_type(obj):
 
 
 def fix_dashes(opts):
-    return [(opt if opt.startswith('-') else '-' * (1 + (len(opt) == 1)) + opt)
-            for opt in opts]
-
-
-main = Program()
-command = main.command
-execute = main.execute
+    for opt in opts:
+        if opt.startswith('-'):
+            yield opt
+        else:
+            yield '-' * (1 + 1 * (len(opt) > 1)) + opt
