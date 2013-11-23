@@ -2,7 +2,10 @@ import re
 import sys
 import inspect
 import argparse
-from itertools import izip_longest
+try:
+    from itertools import izip_longest
+except ImportError:
+    from itertools import zip_longest as izip_longest
 
 
 _POSITIONAL = type('_positional', (object,), {})
