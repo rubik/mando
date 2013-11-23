@@ -11,3 +11,5 @@ script:
     - make cov
 after_succes:
     - coveralls
+notifications:
+    email: false
