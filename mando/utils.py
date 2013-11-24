@@ -38,7 +38,7 @@ def get_opts(param):
             opts.append('{0}{1}'.format(prefix, name))
             names.append(name)
         return max(names, key=len), opts, meta
-    opt, meta = (filter(None, POS_RE.findall(param)) + [''])[:2]
+    opt, meta = (list(filter(None, POS_RE.findall(param))) + [''])[:2]
     return opt, [opt], meta
 
 
