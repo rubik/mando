@@ -82,7 +82,11 @@ class TestFindParamDocs(unittest.TestCase):
         self.params = params
 
     def testFunc(self):
-        self.assertEqual(self.params, find_param_docs(self.doc))
+        modified_params = {}
+        for param, values in self.params.items():
+            modified_params[param] = (values[0], {'type': None, 'help':
+                                                  values[1]})
+        self.assertEqual(modified_params, find_param_docs(self.doc))
 
 
 ###############################################################################
@@ -123,7 +127,16 @@ def analiased(a, b=4):
 @program.command
 def power(x, y=2):
     return int(x) ** y
-#TODO: Add the version of power() without casting to int()
+
+
+@program.command('more-power')
+def more_power(x, y=2):
+    '''This one really shows off complete power.
+
+    :param x <int>: Well, the base.
+    :param y <int>: You got it, the exponent.'''
+
+    return x ** y
 
 
 @parametrized(
@@ -147,6 +160,7 @@ def power(x, y=2):
     ('another 2 --json -o 1', ['2', 1, True, None]),
     ('another 3 --owl 8 --json --tomawk 8', ['3', 8, True, '8']),
     ('alias 5 -b 9', ['5', 9], 'analiased'),
+    ('more-power 9 -y 2', [9, 2], 'more_power'),
 )
 class TestGenericCommands(unittest.TestCase):
 
@@ -165,6 +179,8 @@ class TestGenericCommands(unittest.TestCase):
 @parametrized(
     ('power 2', 4),
     ('power 2 -y 4', 16),
+    ('more-power 3', 9),
+    ('more-power 3 -y 4', 81),
 )
 class TestProgramExecute(unittest.TestCase):
 

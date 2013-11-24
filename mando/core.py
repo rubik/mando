@@ -6,16 +6,14 @@ try:
     from itertools import izip_longest
 except ImportError:  # pragma: no cover
     from itertools import zip_longest as izip_longest
+from mando.utils import find_param_docs, action_by_type, fix_dashes, PARAM_RE
 
 
 _POSITIONAL = type('_positional', (object,), {})
-PARAM_RE = re.compile(r"^([\t ]*):param (.*?): ([^\n]*\n(\1[ \t]+[^\n]*\n)*)",
-                                            re.MULTILINE)
+_DISPATCH_TO = '_dispatch_to'
 
 
 class Program(object):
-
-    _DISPATCH_TO = '_dispatch_to'
 
     def __init__(self, prog=None, version=None):
         self.parser = argparse.ArgumentParser(prog)
@@ -45,13 +43,14 @@ class Program(object):
                                                description=cmd_help or None,
                                                **kwargs)
         for a, kw in all_args:
+            kw = dict((k, v) for k, v in kw.items() if v is not None)
             subparser.add_argument(*a, **kw)
-        subparser.set_defaults(**{self._DISPATCH_TO: func})
+        subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
 
     def parse(self, args):
         arg_map = self.parser.parse_args(args).__dict__
-        command = arg_map.pop(self._DISPATCH_TO)
+        command = arg_map.pop(_DISPATCH_TO)
         argspec = self.argspecs[command.__name__]
         real_args = []
         for arg in argspec.args:
@@ -77,8 +76,8 @@ def analyze_func(func, varargs_name, argz):
         kwargs = {}
         is_positional = isinstance(v, _POSITIONAL)
         if k in params:
-            args, help = params[k]
-            kwargs['help'] = help
+            args, kw = params[k]
+            kwargs.update(kw)
             if not is_positional:
                 args = fix_dashes(args)
         elif not is_positional:
@@ -92,52 +91,6 @@ def analyze_func(func, varargs_name, argz):
     if varargs_name:
         kwargs = {'nargs': '*'}
         if varargs_name in params:
-            kwargs['help'] = params[varargs_name][1]
+            kwargs['help'] = params[varargs_name][1]['help']
         all_args.append(((varargs_name,), kwargs))
     return docstring, all_args
-
-
-def normalize_spaces(string):
-    return re.sub(r'[\r\t\n ]+', ' ', string)
-
-
-def find_param_docs(docstring):
-    if not docstring.endswith('\n'):
-        docstring = docstring + '\n'
-    paramdocs = {}
-    for match in PARAM_RE.finditer(docstring):
-        name = match.group(2)
-        opts = list(map(str.strip, name.split(',')))
-        if len(opts) == 2:
-            name = max(opts, key=len).lstrip('-').replace('-', '_')
-        elif len(opts) == 1:
-            name = opts[0].lstrip('-')
-        # Sanitize name (because Python variables can't contain dashes)
-        name = name.replace('-', '_')
-        paramdocs[name] = (opts, normalize_spaces(match.group(3)).rstrip())
-    return paramdocs
-
-
-def action_by_type(obj):
-    kw = {}
-    if isinstance(obj, bool):
-        return {'action': ['store_true', 'store_false'][obj]}
-    elif isinstance(obj, list):
-        kw = {'action': 'append'}
-    kw.update(get_type(obj))
-    return kw
-
-
-def get_type(obj):
-    otype = type(obj)
-    if any(otype is t for t in set([int, float, str, bool])):
-        return {'type': otype}
-    return {}
-
-
-def fix_dashes(opts):
-    for opt in opts:
-        if opt.startswith('-'):
-            yield opt
-        else:
-            yield '-' * (1 + 1 * (len(opt) > 1)) + opt
