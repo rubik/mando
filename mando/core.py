@@ -44,6 +44,7 @@ class Program(object):
                                                **kwargs)
         for a, kw in all_args:
             kw = dict((k, v) for k, v in kw.items() if v is not None)
+            print '{}, {}'.format(list(a), kw)
             subparser.add_argument(*a, **kw)
         subparser.set_defaults(**{_DISPATCH_TO: func})
         return func

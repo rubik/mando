@@ -23,6 +23,7 @@ def find_param_docs(docstring):
         name, opts, meta = get_opts(param.strip())
         name = name.replace('-', '_')
         paramdocs[name] = (opts, {
+            'metavar': meta or None,
             'type': ARG_TYPE_MAP[meta.strip('<>')],
             'help': normalize_spaces(value).rstrip(),
         })

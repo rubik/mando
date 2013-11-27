@@ -82,11 +82,12 @@ class TestFindParamDocs(unittest.TestCase):
         self.params = params
 
     def testFunc(self):
-        modified_params = {}
-        for param, values in self.params.items():
-            modified_params[param] = (values[0], {'type': None, 'help':
-                                                  values[1]})
-        self.assertEqual(modified_params, find_param_docs(self.doc))
+        found_params = find_param_docs(self.doc)
+        self.assertTrue(self.params.keys() == found_params.keys())
+        for key, value in found_params.items():
+            original_value = self.params[key]
+            self.assertTrue(original_value[0] == value[0])
+            self.assertTrue(original_value[1] == value[1]['help'])
 
 
 ###############################################################################
