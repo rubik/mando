@@ -6,16 +6,15 @@ try:
     from itertools import izip_longest
 except ImportError:  # pragma: no cover
     from itertools import zip_longest as izip_longest
+from mando.utils import (purify_doc, action_by_type, find_param_docs,
+                         ensure_dashes, purify_kwargs)
 
 
 _POSITIONAL = type('_positional', (object,), {})
-PARAM_RE = re.compile(r"^([\t ]*):param (.*?): ([^\n]*\n(\1[ \t]+[^\n]*\n)*)",
-                                            re.MULTILINE)
+_DISPATCH_TO = '_dispatch_to'
 
 
 class Program(object):
-
-    _DISPATCH_TO = '_dispatch_to'
 
     def __init__(self, prog=None, version=None):
         self.parser = argparse.ArgumentParser(prog)
@@ -40,18 +39,19 @@ class Program(object):
         argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults),
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
-        cmd_help, all_args = analyze_func(func, argspec.varargs, argz)
+        doc = (inspect.getdoc(func) or '').strip()
+        cmd_help = purify_doc(doc)
         subparser = self.subparsers.add_parser(name,
                                                description=cmd_help or None,
                                                **kwargs)
-        for a, kw in all_args:
-            subparser.add_argument(*a, **kw)
-        subparser.set_defaults(**{self._DISPATCH_TO: func})
+        for a, kw in analyze_func(doc, argz, argspec.varargs):
+            subparser.add_argument(*a, **purify_kwargs(kw))
+        subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
 
     def parse(self, args):
         arg_map = self.parser.parse_args(args).__dict__
-        command = arg_map.pop(self._DISPATCH_TO)
+        command = arg_map.pop(_DISPATCH_TO)
         argspec = self.argspecs[command.__name__]
         real_args = []
         for arg in argspec.args:
@@ -68,76 +68,20 @@ class Program(object):
         self.execute(sys.argv[1:])
 
 
-def analyze_func(func, varargs_name, argz):
-    doc = (inspect.getdoc(func) or '').strip()
+def analyze_func(doc, argz, varargs_name):
     params = find_param_docs(doc)
-    docstring = PARAM_RE.sub('', doc).rstrip()
-    all_args = []
-    for k, v in argz:
-        kwargs = {}
-        is_positional = isinstance(v, _POSITIONAL)
-        if k in params:
-            args, help = params[k]
-            kwargs['help'] = help
-            if not is_positional:
-                args = fix_dashes(args)
-        elif not is_positional:
-            args = fix_dashes([k])
-        else:
-            args = [k]
-        if not is_positional:
-            kwargs.update({'default': v, 'dest': k})
-            kwargs.update(action_by_type(v))
-        all_args.append((args, kwargs))
-    if varargs_name:
+    for arg, default in argz:
+        yield merge(arg, default, *params.get(arg, ([], {})))
+    if varargs_name is not None:
         kwargs = {'nargs': '*'}
-        if varargs_name in params:
-            kwargs['help'] = params[varargs_name][1]
-        all_args.append(((varargs_name,), kwargs))
-    return docstring, all_args
+        kwargs.update(params.get(varargs_name, (None, {}))[1])
+        yield ([varargs_name], kwargs)
 
 
-def normalize_spaces(string):
-    return re.sub(r'[\r\t\n ]+', ' ', string)
-
-
-def find_param_docs(docstring):
-    if not docstring.endswith('\n'):
-        docstring = docstring + '\n'
-    paramdocs = {}
-    for match in PARAM_RE.finditer(docstring):
-        name = match.group(2)
-        opts = list(map(str.strip, name.split(',')))
-        if len(opts) == 2:
-            name = max(opts, key=len).lstrip('-').replace('-', '_')
-        elif len(opts) == 1:
-            name = opts[0].lstrip('-')
-        # Sanitize name (because Python variables can't contain dashes)
-        name = name.replace('-', '_')
-        paramdocs[name] = (opts, normalize_spaces(match.group(3)).rstrip())
-    return paramdocs
-
-
-def action_by_type(obj):
-    kw = {}
-    if isinstance(obj, bool):
-        return {'action': ['store_true', 'store_false'][obj]}
-    elif isinstance(obj, list):
-        kw = {'action': 'append'}
-    kw.update(get_type(obj))
-    return kw
-
-
-def get_type(obj):
-    otype = type(obj)
-    if any(otype is t for t in set([int, float, str, bool])):
-        return {'type': otype}
-    return {}
-
-
-def fix_dashes(opts):
-    for opt in opts:
-        if opt.startswith('-'):
-            yield opt
-        else:
-            yield '-' * (1 + 1 * (len(opt) > 1)) + opt
+def merge(arg, default, args, kwargs):
+    opts = [arg]
+    if not isinstance(default, _POSITIONAL):
+        opts = args or ensure_dashes(opts)
+        kwargs.update({'default': default, 'dest': arg})
+        kwargs.update(action_by_type(default))
+    return opts, kwargs

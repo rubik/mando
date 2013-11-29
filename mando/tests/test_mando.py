@@ -1,7 +1,7 @@
 import unittest
 from paramunittest import parametrized
 from mando import command, parse, Program
-from mando.core import action_by_type, fix_dashes, find_param_docs
+from mando.utils import action_by_type, ensure_dashes, find_param_docs
 
 
 @parametrized(
@@ -40,13 +40,13 @@ class TestFixDashes(unittest.TestCase):
         self.result = result
 
     def testFunc(self):
-        self.assertEqual(self.result, list(fix_dashes(self.opts)))
+        self.assertEqual(self.result, list(ensure_dashes(self.opts)))
 
 
-a_1 = {'a_param': (['a-param'], 'Short story.')}
-a_1_1 = {'a_param': (['a_param'], 'Short story.')}
-a_2 = {'j': (['-j'], 'Woow')}
-a_3 = {'noun': (['-n', '--noun'], 'cat')}
+a_1 = {'a_param': (['a-param'], {'help': 'Short story.'})}
+a_1_1 = {'a_param': (['a_param'], {'help': 'Short story.'})}
+a_2 = {'j': (['-j'], {'help': 'Woow'})}
+a_3 = {'noun': (['-n', '--noun'], {'help': 'cat'})}
 a_all = {}
 for a in (a_1, a_2, a_3):
     a_all.update(a)
@@ -61,7 +61,7 @@ for a in (a_1, a_2, a_3):
     dict(doc='''
          Some short text here and there.
 
-         :param well: water''', params={'well': (['well'], 'water')}),
+         :param well: water''', params={'well': (['well'], {'help': 'water'})}),
     dict(doc='''
          :param a-param: Short story.
          :param -j: Woow
@@ -71,9 +71,9 @@ for a in (a_1, a_2, a_3):
 
          :param long-story: A long storey belive me: when all started, Adam and
              Bob were just two little farmers.
-         ''', params={'long_story': (['long-story'], 'A long storey belive me:'
-                                     ' when all started, Adam and Bob were '
-                                     'just two little farmers.')}),
+         ''', params={'long_story': (['long-story'], {'help': 'A long storey '\
+                                     'belive me: when all started, Adam and '\
+                                     'Bob were just two little farmers.'})}),
 )
 class TestFindParamDocs(unittest.TestCase):
 
@@ -82,7 +82,14 @@ class TestFindParamDocs(unittest.TestCase):
         self.params = params
 
     def testFunc(self):
-        self.assertEqual(self.params, find_param_docs(self.doc))
+        found_params = find_param_docs(self.doc)
+        self.assertTrue(self.params.keys() == found_params.keys())
+        for key, value in self.params.items():
+            self.assertTrue(key in found_params)
+            found_value = found_params[key]
+            self.assertTrue(value[0] == found_value[0])
+            for kwarg, val in value[1].items():
+                self.assertTrue(val == found_value[1][kwarg])
 
 
 ###############################################################################
@@ -123,7 +130,16 @@ def analiased(a, b=4):
 @program.command
 def power(x, y=2):
     return int(x) ** y
-#TODO: Add the version of power() without casting to int()
+
+
+@program.command('more-power')
+def more_power(x, y=2):
+    '''This one really shows off complete power.
+
+    :param x <int>: Well, the base.
+    :param -y <int>: You got it, the exponent.'''
+
+    return x ** y
 
 
 @parametrized(
@@ -147,6 +163,7 @@ def power(x, y=2):
     ('another 2 --json -o 1', ['2', 1, True, None]),
     ('another 3 --owl 8 --json --tomawk 8', ['3', 8, True, '8']),
     ('alias 5 -b 9', ['5', 9], 'analiased'),
+    ('more-power 9 -y 2', [9, 2], 'more_power'),
 )
 class TestGenericCommands(unittest.TestCase):
 
@@ -165,6 +182,8 @@ class TestGenericCommands(unittest.TestCase):
 @parametrized(
     ('power 2', 4),
     ('power 2 -y 4', 16),
+    ('more-power 3', 9),
+    ('more-power 3 -y 4', 81),
 )
 class TestProgramExecute(unittest.TestCase):
 
