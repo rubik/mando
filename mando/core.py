@@ -32,10 +32,19 @@ class Program(object):
                 return self._generate_command(func, *args, **kwargs)
             return _command
 
+    def arg(self, param, *args, **kwargs):
+        def wrapper(func):
+            if not hasattr(func, '_argopts'):
+                func._argopts = {}
+            func._argopts[param] = (args, kwargs)
+            return func
+        return wrapper
+
     def _generate_command(self, func, name=None, *args, **kwargs):
-        name = func.__name__ if name is None else name
+        func_name = func.__name__
+        name = func_name if name is None else name
         argspec = inspect.getargspec(func)
-        self.argspecs[func.__name__] = argspec
+        self.argspecs[func_name] = argspec
         argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults),
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
@@ -44,10 +53,20 @@ class Program(object):
         subparser = self.subparsers.add_parser(name,
                                                description=cmd_help or None,
                                                **kwargs)
-        for a, kw in analyze_func(doc, argz, argspec.varargs):
+        for a, kw in self.analyze_func(func, doc, argz, argspec.varargs):
             subparser.add_argument(*a, **purify_kwargs(kw))
         subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
+
+    def analyze_func(self, func, doc, argz, varargs_name):
+        params = find_param_docs(doc)
+        for arg, default in argz:
+            override = getattr(func, '_argopts', {}).get(arg, ((), {}))
+            yield merge(arg, default, override, *params.get(arg, ([], {})))
+        if varargs_name is not None:
+            kwargs = {'nargs': '*'}
+            kwargs.update(params.get(varargs_name, (None, {}))[1])
+            yield ([varargs_name], kwargs)
 
     def parse(self, args):
         arg_map = self.parser.parse_args(args).__dict__
@@ -68,20 +87,11 @@ class Program(object):
         self.execute(sys.argv[1:])
 
 
-def analyze_func(doc, argz, varargs_name):
-    params = find_param_docs(doc)
-    for arg, default in argz:
-        yield merge(arg, default, *params.get(arg, ([], {})))
-    if varargs_name is not None:
-        kwargs = {'nargs': '*'}
-        kwargs.update(params.get(varargs_name, (None, {}))[1])
-        yield ([varargs_name], kwargs)
-
-
-def merge(arg, default, args, kwargs):
+def merge(arg, default, override, args, kwargs):
     opts = [arg]
     if not isinstance(default, _POSITIONAL):
-        opts = args or ensure_dashes(opts)
+        opts = list(ensure_dashes(args or opts))
         kwargs.update({'default': default, 'dest': arg})
         kwargs.update(action_by_type(default))
-    return opts, kwargs
+    kwargs.update(override[1])
+    return override[0] or opts, kwargs

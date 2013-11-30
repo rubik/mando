@@ -119,7 +119,7 @@ def another(baw, owl=42, json=False, tomawk=None):
     :param -o, --owl: Yeah, I know, this is too much.
     :param -j, --json: In case you want to pipe it through something.
     :param -t, --tomawk: Well, in this case -t isn't for time.'''
-    pass  # (Obviously)
+    pass
 
 
 @program.command('alias')
@@ -140,6 +140,34 @@ def more_power(x, y=2):
     :param -y <int>: You got it, the exponent.'''
 
     return x ** y
+
+
+@program.command('more-powerful')
+@program.arg('x', type=int)
+@program.arg('y', '-y', '--epsilon', type=int)
+def more_power_2(x, y=2):
+    return x ** y
+
+
+@program.command
+@program.arg('x', type=int)
+@program.arg('y', type=int)
+def overriding(x, y=4):
+    '''Yoo an override test.
+
+    :param x <str>: This is so wroong!!! Let's hope it gets overriden by @arg.
+    :param -y <str>: This too!!'''
+
+    return x - y
+
+
+@program.command
+def dashes(a, b=5):
+    '''Usual command help.
+
+    :param a <int>: A help obviously.
+    :param b <int>: Yooo.'''
+    return a ** b
 
 
 @parametrized(
@@ -164,6 +192,12 @@ def more_power(x, y=2):
     ('another 3 --owl 8 --json --tomawk 8', ['3', 8, True, '8']),
     ('alias 5 -b 9', ['5', 9], 'analiased'),
     ('more-power 9 -y 2', [9, 2], 'more_power'),
+    ('more-powerful 9 -y 3', [9, 3], 'more_power_2'),
+    ('more-powerful 9 --epsilon 3', [9, 3], 'more_power_2'),
+    ('overriding 2', [2, 4]),
+    ('overriding 2 -y 7', [2, 7]),
+    ('dashes 2', [2, 5]),
+    ('dashes 8 -b 7', [8, 7]),
 )
 class TestGenericCommands(unittest.TestCase):
 
@@ -184,6 +218,12 @@ class TestGenericCommands(unittest.TestCase):
     ('power 2 -y 4', 16),
     ('more-power 3', 9),
     ('more-power 3 -y 4', 81),
+    ('more-powerful 4 -y 2', 16),
+    ('more-powerful 4 --epsilon 2', 16),
+    ('overriding 2', -2),
+    ('overriding 2 -y 7', -5),
+    ('dashes 2', 32),
+    ('dashes 7 -b 3', 343),
 )
 class TestProgramExecute(unittest.TestCase):
 
