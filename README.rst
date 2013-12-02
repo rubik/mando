@@ -14,7 +14,7 @@ mando
     :target: https://coveralls.io/r/rubik/mando
 
 
-  "CLI interfaces for Humans!"
+  > "CLI interfaces for Humans!"
 
 mando is a wrapper around argparse, and allows you to write complete CLI
 applications in seconds while maintaining all the flexibility.
