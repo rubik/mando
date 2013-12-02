@@ -13,6 +13,14 @@ mando: CLI interfaces for Humans!
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/mando
 
+.. image:: https://pypip.in/v/mando/badge.png
+    :alt: Latest release
+    :target: https://pypi.python.org/pypi/mando
+
+.. image:: https://pypip.in/d/mando/badge.png
+    :alt: PyPI downloads count
+    :target: https://pypi.python.org/pypi/mando
+
 mando is a wrapper around ``argparse``, and allows you to write complete CLI
 applications in seconds while maintaining all the flexibility.
 
