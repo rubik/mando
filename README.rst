@@ -1,8 +1,6 @@
 mando
 =====
 
-> CLI interfaces for Humans!
-
 .. image:: https://travis-ci.org/rubik/mando.png?branch=master
     :alt: Travis-CI badge
     :target: https://travis-ci.org/rubik/mando
@@ -15,9 +13,18 @@ mando
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/mando
 
+
+  "CLI interfaces for Humans!"
+
 mando is a wrapper around argparse, and allows you to write complete CLI
 applications in seconds while maintaining all the flexibility.
 
+The problem
+-----------
+
+While ``argparse`` is great for simple command line applications, with only
+one, default command, when you have to add multiple commands and manage them
+things get really messy and long. But don't worry, mando comes to help!
 
 Quickstart
 ----------
