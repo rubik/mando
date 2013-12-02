@@ -2,7 +2,6 @@
 ordinary Python functions into commands for the command line. It uses
 :py:module:``argparse`` behind the scenes.'''
 
-import re
 import sys
 import inspect
 import argparse
@@ -11,7 +10,7 @@ try:
 except ImportError:  # pragma: no cover
     from itertools import zip_longest as izip_longest
 from mando.utils import (purify_doc, action_by_type, find_param_docs,
-                         ensure_dashes, purify_kwargs)
+                         split_doc, ensure_dashes, purify_kwargs)
 
 
 _POSITIONAL = type('_positional', (object,), {})
@@ -66,10 +65,10 @@ class Program(object):
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
         doc = (inspect.getdoc(func) or '').strip()
-        cmd_help = purify_doc(doc)
-        #TODO: distinguish between desc and help
+        cmd_help, cmd_desc = split_doc(purify_doc(doc))
         subparser = self.subparsers.add_parser(name,
-                                               description=cmd_help or None,
+                                               help=cmd_help or None,
+                                               description=cmd_desc or None,
                                                **kwargs)
         for a, kw in self.analyze_func(func, doc, argz, argspec.varargs):
             subparser.add_argument(*a, **purify_kwargs(kw))

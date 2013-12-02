@@ -24,6 +24,16 @@ def purify_doc(string):
     return PARAM_RE.sub('', string).rstrip()
 
 
+def split_doc(string):
+    '''Split the documentation into help and description.
+
+    A two-value list is returned, of the form ``[help, desc]``.'''
+    parts = map(str.strip, string.split('\n\n', 1))
+    if len(parts) == 1:
+        return parts * 2
+    return parts
+
+
 def purify_kwargs(kwargs):
     '''If type or metavar are set to None, they are removed from kwargs.'''
     for key, value in kwargs.copy().items():
@@ -52,6 +62,7 @@ def get_opts(param):
     if param.startswith('-'):
         opts = []
         names = []
+        meta = None
         for long, name, meta in ARG_RE.findall(param):
             prefix = ['-', '--'][len(long)]
             opts.append('{0}{1}'.format(prefix, name))
