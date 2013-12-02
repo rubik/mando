@@ -50,8 +50,6 @@ Generated help:
     optional arguments:
       -h, --help  show this help message and exit
 
-.. code-block:: console
-
     $ python example.py echo -h
     usage: example.py echo [-h] [--capitalyze] text
 
