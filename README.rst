@@ -26,7 +26,7 @@ things get really messy and long. But don't worry, mando comes to help!
 Quickstart
 ----------
 
-::
+.. code-block:: python
 
     from mando import command, main
 
@@ -38,7 +38,7 @@ Quickstart
 
 Generated help:
 
-::
+.. code-block:: console
 
     $ python example.py -h
     usage: example.py [-h] {echo} ...
@@ -50,7 +50,7 @@ Generated help:
     optional arguments:
       -h, --help  show this help message and exit
 
-::
+.. code-block:: console
 
     $ python example.py echo -h
     usage: example.py echo [-h] [--capitalyze] text
@@ -66,7 +66,7 @@ Generated help:
 
 Actual usage:
 
-::
+.. code-block:: console
 
     $ python example.py echo spam
     spam
@@ -79,7 +79,7 @@ A *real* example
 
 Something more complex and real-world-*ish*. The code:
 
-::
+.. code-block:: python
 
     from mando import command, main
 
@@ -101,7 +101,7 @@ Something more complex and real-world-*ish*. The code:
     if __name__ == '__main__':
         main()
 
-::
+.. code-block:: console
 
     $ python git.py push -h
     usage: git.py push [-h] [--all] [-n] [-f] [--thin] repository
@@ -120,7 +120,7 @@ Something more complex and real-world-*ish*. The code:
 
 Let's try it!
 
-::
+.. code-block:: console
 
     $ python git.py push --all myrepo
     Pushing to myrepo. All: True, dry run: False, force: False, thin: False
