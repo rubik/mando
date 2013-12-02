@@ -1,8 +1,9 @@
 import re
 
 PARAM_RE = re.compile(r"^([\t ]*):param (.*?): ([^\n]*\n(\1[ \t]+[^\n]*\n)*)",
-                                            re.MULTILINE)
-ARG_RE = re.compile(r'-(?P<long>-)?(?P<key>(?(long)[^ =,]+|.))[ =]?(?P<meta>[^ ,]+)?')
+                      re.MULTILINE)
+ARG_RE = re.compile(r'-(?P<long>-)?(?P<key>(?(long)[^ =,]+|.))[ =]?'
+                    '(?P<meta>[^ ,]+)?')
 POS_RE = re.compile(r'(?P<meta>[^ ,]+)?')
 ARG_TYPE_MAP = {
     'n': int, 'num': int, 'number': int,
@@ -12,15 +13,19 @@ ARG_TYPE_MAP = {
     None: None, '': None,
 }
 
+
 def normalize_spaces(string):
+    '''Convert whitespace to spaces.'''
     return re.sub(r'[\r\t\n ]+', ' ', string)
 
 
 def purify_doc(string):
+    '''Remove Sphinx's :param: lines from the docstring.'''
     return PARAM_RE.sub('', string).rstrip()
 
 
 def purify_kwargs(kwargs):
+    '''If type or metavar are set to None, they are removed from kwargs.'''
     for key, value in kwargs.copy().items():
         if key in set(['type', 'metavar']) and value is None:
             del kwargs[key]
@@ -28,7 +33,8 @@ def purify_kwargs(kwargs):
 
 
 def find_param_docs(docstring):
-    #if not docstring.endswith('\n'):
+    '''Find Sphinx's :param: lines and return a dictionary of the form:
+        ``param: (opts, {metavar: meta, type: type, help: help})``.'''
     paramdocs = {}
     for _, param, value, _ in PARAM_RE.findall(docstring + '\n'):
         name, opts, meta = get_opts(param.strip())
@@ -42,6 +48,7 @@ def find_param_docs(docstring):
 
 
 def get_opts(param):
+    '''Extract options from a parameter name.'''
     if param.startswith('-'):
         opts = []
         names = []
@@ -55,6 +62,7 @@ def get_opts(param):
 
 
 def action_by_type(obj):
+    '''Determine an action and a type for the given object if possible.'''
     kw = {}
     if isinstance(obj, bool):
         return {'action': ['store_true', 'store_false'][obj]}
@@ -65,6 +73,7 @@ def action_by_type(obj):
 
 
 def get_type(obj):
+    '''Determine the type of the object if among some of the built-in ones.'''
     otype = type(obj)
     if any(otype is t for t in set([int, float, str, bool])):
         return {'type': otype}
@@ -72,6 +81,7 @@ def get_type(obj):
 
 
 def ensure_dashes(opts):
+    '''Ensure that the options have the right number of dashes.'''
     for opt in opts:
         if opt.startswith('-'):
             yield opt

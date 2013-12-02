@@ -17,6 +17,7 @@ setup(name='mando',
       platforms='any',
       long_description=readme,
       packages=['mando', 'mando.tests'],
+      test_suite='mando.tests',
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
