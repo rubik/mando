@@ -13,7 +13,7 @@ mando: CLI interfaces for Humans!
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/mando
 
-mando is a wrapper around argparse, and allows you to write complete CLI
+mando is a wrapper around ``argparse``, and allows you to write complete CLI
 applications in seconds while maintaining all the flexibility.
 
 The problem
