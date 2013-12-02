@@ -101,6 +101,9 @@ Something more complex and real-world-*ish*. The code:
     if __name__ == '__main__':
         main()
 
+mando understands Sphinx-style ``:param:``'s in the docstring, so it creates
+short options and their help for you.
+
 .. code-block:: console
 
     $ python git.py push -h
