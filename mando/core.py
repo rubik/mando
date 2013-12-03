@@ -61,7 +61,8 @@ class Program(object):
         name = func_name if name is None else name
         argspec = inspect.getargspec(func)
         self.argspecs[func_name] = argspec
-        argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults),
+        argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults
+                                                             or []),
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
         doc = (inspect.getdoc(func) or '').strip() + '\n'
@@ -135,5 +136,9 @@ def merge(arg, default, override, args, kwargs):
         opts = list(ensure_dashes(args or opts))
         kwargs.update({'default': default, 'dest': arg})
         kwargs.update(action_by_type(default))
+    else:
+        # positionals can't have a metavar, otherwise the help is screwed
+        # if one really wants the metavar, it can be added with @arg
+        kwargs['metavar'] = None
     kwargs.update(override[1])
     return override[0] or opts, kwargs
