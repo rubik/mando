@@ -118,7 +118,7 @@ short options and their help for you.
     $ python git.py push -h
     usage: git.py push [-h] [--all] [-n] [-f] [--thin] repository
 
-    :param --thin: Use thin pack.
+    Update remote refs along with associated objects.
 
     positional arguments:
       repository     Repository to push to.

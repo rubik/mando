@@ -64,7 +64,7 @@ class Program(object):
         argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults),
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
-        doc = (inspect.getdoc(func) or '').strip()
+        doc = (inspect.getdoc(func) or '').strip() + '\n'
         cmd_help, cmd_desc = split_doc(purify_doc(doc))
         subparser = self.subparsers.add_parser(name,
                                                help=cmd_help or None,
