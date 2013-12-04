@@ -13,15 +13,15 @@ The problem
 -----------
 
 ``argparse`` is great for single-command applications, which only have some
-options. Unfortunately, when more commands are added, the boilerplate grows too
-much along with the complexity and the verboseness of the code.
+options and one, default command. Unfortunately, when more commands are added,
+the code grows too much along with its complexity.
 
 The solution
 ------------
 mando makes an attempt to simplify this. Since commands are nothing but
 functions, mando simply provides a couple of decorators and the job is done.
 mando tries to infer as much as possible, in order to allow you to write just
-the strictly necessary code.
+the code that is strictly necessary.
 
 This example should showcase most of mando's features::
 
@@ -114,6 +114,25 @@ let's check the program itself:
     Debug options: dbg,follow,trace
     Starting search with pattern: *
     No file found!
+
+    $ python gnu.py find -d 1 . "*.pyc"
+    If you choose maxdepth, at least set it > 1
+    Debug options: None
+    Starting search with pattern: *.pyc
+    No file found!
+    $ python gnu.py find --maxdepth 0 . "*.pyc"
+    If you choose maxdepth, at least set it > 1
+    Debug options: None
+    Starting search with pattern: *.pyc
+    No file found!
+    $ python gnu.py find --maxdepth 4 . "*.pyc"
+    Debug options: None
+    Starting search with pattern: *.pyc
+    No file found!
+
+    $ python gnu.py find --maxdepth 4 .
+    usage: gnu.py find [-h] [-d <levels>] [-P] [-D <debug-opt>] path pattern
+    gnu.py find: error: too few arguments
 
 Contents
 --------
