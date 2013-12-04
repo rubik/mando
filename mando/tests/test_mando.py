@@ -1,7 +1,7 @@
 import unittest
 from paramunittest import parametrized
 from mando import command, parse, Program
-from mando.utils import action_by_type, ensure_dashes, find_param_docs
+from mando.utils import action_by_type, ensure_dashes, find_param_docs, split_doc
 
 
 @parametrized(
@@ -33,7 +33,7 @@ class TestActionByType(unittest.TestCase):
     (['-m', '--min'], ['-m', '--min']),
     (['-m', '--min', 'l', 'less'], ['-m', '--min', '-l', '--less']),
 )
-class TestFixDashes(unittest.TestCase):
+class TestEnsureDashes(unittest.TestCase):
 
     def setParameters(self, opts, result):
         self.opts = opts
@@ -41,6 +41,23 @@ class TestFixDashes(unittest.TestCase):
 
     def testFunc(self):
         self.assertEqual(self.result, list(ensure_dashes(self.opts)))
+
+
+@parametrized(
+    ('', ['', '']),
+    ('only help.', ['only help.', 'only help.']),
+    ('help.\nstill help.', ['help.\nstill help.', 'help.\nstill help.']),
+    ('help\n\ndesc', ['help', 'desc']),
+    ('help\n\n\ndesc\n', ['help', 'desc']),
+)
+class TestSplitDoc(unittest.TestCase):
+
+    def setParameters(self, doc, parts):
+        self.doc = doc
+        self.parts = parts
+
+    def testFunc(self):
+        self.assertEqual(self.parts, split_doc(self.doc))
 
 
 a_1 = {'a_param': (['a-param'], {'help': 'Short story.'})}
