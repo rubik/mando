@@ -57,9 +57,9 @@ This example should showcase most of mando's features::
 mando extracts information from your command's docstring. So you can document
 your code and create the CLI application at once! The first paragraph is taken
 to generate the command's *help*. The remaining part (after removing all
-`:param:`'s) is the *description*. For everything that does not fit in the
+``:param:``'s) is the *description*. For everything that does not fit in the
 docstring, mando provides the ``@arg`` decorator, to override arbitrary
-arguments before they get passed to `argparse`.
+arguments before they get passed to ``argparse``.
 
 .. code-block:: console
 
