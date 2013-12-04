@@ -173,7 +173,7 @@ def overriding(x, y=4):
     '''Yoo an override test.
 
     :param x <str>: This is so wroong!!! Let's hope it gets overriden by @arg.
-    :param -y <str>: This too!!'''
+    :param -y <metavar>: This too!!'''
 
     return x - y
 
