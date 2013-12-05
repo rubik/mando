@@ -2,6 +2,8 @@
 
 if __name__ == '__main__':
     import unittest
-    from mando.tests.test_mando import *
+    from mando.tests.test_core import *
+    from mando.tests.test_utils import *
+    from mando.tests.test_examples import *
 
     unittest.main()
