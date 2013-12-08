@@ -140,6 +140,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   usage.rst
 
 
 Indices and tables
