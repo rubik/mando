@@ -77,6 +77,11 @@ def dashes(a, b=5):
     return a ** b
 
 
+@program.command
+def append(acc=[]):
+    return acc
+
+
 @parametrized(
     ('goo 2', ['2', False, None]),
     ('goo 2 --verbose', ['2', True, None]),
@@ -105,6 +110,9 @@ def dashes(a, b=5):
     ('overriding 2 -y 7', [2, 7]),
     ('dashes 2', [2, 5]),
     ('dashes 8 -b 7', [8, 7]),
+    ('append', [[]]),
+    ('append --acc 2', [['2']]),
+    ('append --acc 2 --acc 3', [['2', '3']]),
 )
 class TestGenericCommands(unittest.TestCase):
 

@@ -26,6 +26,7 @@ class Program(object):
                                      version=version)
         self.subparsers = self.parser.add_subparsers()
         self.argspecs = {}
+        self.current_command = None
 
     def command(self, *args, **kwargs):
         '''A decorator to convert a function into a command. It can be applied
@@ -116,6 +117,7 @@ class Program(object):
 
         :param args: The arguments to parse.'''
         command, a = self.parse(args)
+        self.current_command = command.__name__
         return command(*a)
 
     def __call__(self):  # pragma: no cover
