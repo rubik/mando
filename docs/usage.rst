@@ -237,9 +237,31 @@ Actual usage::
 Overriding arguments with ``@arg``
 ----------------------------------
 
-TODO
+You may need to specify some argument to argparse, and it is not possible to
+include in the docstring. mando provides the ``@arg`` decorator to accomplish
+this. Its signature is as follows: ``@arg(arg_name, *args, **kwargs)``, where
+``arg_name`` must be among the function's arguments, while the remaining
+arguments will be directly passed to ``argparse.add_argument()``.
+Note that this decorator will override other arguments that mando inferred
+either from the defaults or from the docstring.
+the docstring
+
 
 Aliasing commands
 -----------------
 
-TODO
+A common use-case for this is represented by a function with underscores in it.
+Usually commands have dashes instead. So, you may specify the aliasing name to
+the ``@command()`` decorator, this way::
+
+    @command('very-powerful-cmd')
+    def very_powerful_cmd(arg, verbose=False):
+        pass
+
+And call it as follows:
+
+.. code-block:: console
+
+    $ python prog.py very-powerful-cmd 2 --verbose
+
+Note that the original name will be discarded and won't be usable.
