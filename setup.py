@@ -20,7 +20,7 @@ setup(name='mando',
       platforms='any',
       long_description=readme,
       packages=['mando', 'mando.tests'],
-      install_requires=['argparse']
+      install_requires=['argparse'],
       test_suite='mando.tests',
       classifiers=[
           'Development Status :: 3 - Alpha',
