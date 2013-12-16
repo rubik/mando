@@ -4,6 +4,8 @@ try:
     import mando
 except ImportError as e:
     version = e.version
+else:
+    version = mando.__version__
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
