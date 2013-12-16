@@ -1,18 +1,16 @@
 import os
 from setuptools import setup
-import mando
-setup_requires = []
 try:
-    import argparse
-except ImportError:
-    setup_requires.append('argparse')
+    import mando
+except ImportError as e:
+    version = e.version
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
     readme = fobj.read()
 
 setup(name='mando',
-      version=mando.__version__,
+      version=version,
       author='Michele Lacchia',
       author_email='michelelacchia@gmail.com',
       url='https://mando.readthedocs.org/',
@@ -22,8 +20,8 @@ setup(name='mando',
       platforms='any',
       long_description=readme,
       packages=['mando', 'mando.tests'],
+      install_requires=['argparse']
       test_suite='mando.tests',
-      setup_requires=setup_requires,
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
