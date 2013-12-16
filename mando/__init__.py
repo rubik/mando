@@ -1,6 +1,6 @@
 from mando.core import Program
 
-__version__ = '0.3'
+__version__ = '0.3.1'
 
 
 main = Program()
