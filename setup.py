@@ -4,8 +4,10 @@ try:
     import mando
 except ImportError as e:
     version = e.version
+    deps = ['argparse']
 else:
     version = mando.__version__
+    deps = []
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
@@ -22,7 +24,7 @@ setup(name='mando',
       platforms='any',
       long_description=readme,
       packages=['mando', 'mando.tests'],
-      install_requires=['argparse'],
+      install_requires=deps,
       test_suite='mando.tests',
       classifiers=[
           'Development Status :: 3 - Alpha',
