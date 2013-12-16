@@ -1,6 +1,11 @@
 import os
 from setuptools import setup
 import mando
+setup_requires = []
+try:
+    import argparse
+except ImportError:
+    setup_requires.append('argparse')
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
@@ -18,7 +23,7 @@ setup(name='mando',
       long_description=readme,
       packages=['mando', 'mando.tests'],
       test_suite='mando.tests',
-      setup_requires=['argparse'],
+      setup_requires=setup_requires,
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
