@@ -18,6 +18,7 @@ setup(name='mando',
       long_description=readme,
       packages=['mando', 'mando.tests'],
       test_suite='mando.tests',
+      install_requires=['argparse'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
