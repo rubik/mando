@@ -1,5 +1,5 @@
-strictness:
-    - high
+strictness: high
 ignore_paths:
     - docs
     - examples
+    - setup.py
