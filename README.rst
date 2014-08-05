@@ -1,7 +1,7 @@
 mando: CLI interfaces for Humans!
 =================================
 
-.. image:: https://travis-ci.org/rubik/mando.png?branch=master
+.. image:: http://img.shields.io/travis/rubik/mando/master.svg?style=flat
     :alt: Travis-CI badge
     :target: https://travis-ci.org/rubik/mando
 
@@ -9,17 +9,21 @@ mando: CLI interfaces for Humans!
     :alt: Drone badge
     :target: https://drone.io/github.com/rubik/mando
 
-.. image:: https://coveralls.io/repos/rubik/mando/badge.png
+.. image:: http://img.shields.io/coveralls/rubik/mando/master.svg?style=flat
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/mando
 
-.. image:: https://pypip.in/v/mando/badge.png
+.. image:: https://pypip.in/v/mando/badge.png?style=flat
     :alt: Latest release
     :target: https://pypi.python.org/pypi/mando
 
-.. image:: https://pypip.in/d/mando/badge.png
+.. image:: https://pypip.in/d/mando/badge.png?style=flat
     :alt: PyPI downloads count
     :target: https://pypi.python.org/pypi/mando
+
+.. image:: https://pypip.in/license/mando/badge.png?style=flat
+    :alt: Mando license
+    :target: https://pypi.python.org/pypi/mando/
 
 mando is a wrapper around ``argparse``, and allows you to write complete CLI
 applications in seconds while maintaining all the flexibility.
