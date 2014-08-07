@@ -26,6 +26,9 @@ setup(name='mando',
       packages=['mando', 'mando.tests'],
       install_requires=deps,
       test_suite='mando.tests',
+      keywords='argparse,argument parser,arguments,cli,command line,'
+               'commands,decorator,dispatch,flags,getopt,options,optparse,'
+               'parser,subcommands',
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
