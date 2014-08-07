@@ -3,10 +3,12 @@ python:
     - "2.7"
     - "3.2"
     - "3.3"
+    - "3.4"
     - "pypy"
 install:
     - pip install -e . --use-mirrors
     - pip install -r test_requirements.pip
+    - ./install-26-deps.sh
 script:
     - make cov
 after_success:
