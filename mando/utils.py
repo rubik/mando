@@ -14,11 +14,6 @@ ARG_TYPE_MAP = {
 }
 
 
-def normalize_spaces(string):
-    '''Convert whitespace to spaces.'''
-    return re.sub(r'[\r\t\n ]+', ' ', string)
-
-
 def purify_doc(string):
     '''Remove Sphinx's :param: lines from the docstring.'''
     return PARAM_RE.sub('', string).rstrip()
@@ -53,7 +48,7 @@ def find_param_docs(docstring):
         paramdocs[name] = (opts, {
             'metavar': meta or None,
             'type': ARG_TYPE_MAP.get(meta.strip('<>')),
-            'help': normalize_spaces(value).rstrip(),
+            'help': value.rstrip(),
         })
     return paramdocs
 
