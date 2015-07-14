@@ -1,6 +1,6 @@
 import re
 
-PARAM_RE = re.compile(r"^([\t ]*):param (.*?): ([^\n]*\n(\1[ \t]+[^\n]*\n)*)",
+PARAM_RE = re.compile(r"^([\t ]*):param (.*?): (.*\n(\1[ \t]+.*\n*)*)",
                       re.MULTILINE)
 ARG_RE = re.compile(r'-(?P<long>-)?(?P<key>(?(long)[^ =,]+|.))[ =]?'
                     '(?P<meta>[^ ,]+)?')
@@ -12,11 +12,6 @@ ARG_TYPE_MAP = {
     'f': float, 'float': float,
     None: None, '': None,
 }
-
-
-def normalize_spaces(string):
-    '''Convert whitespace to spaces.'''
-    return re.sub(r'[\r\t\n ]+', ' ', string)
 
 
 def purify_doc(string):
@@ -53,7 +48,7 @@ def find_param_docs(docstring):
         paramdocs[name] = (opts, {
             'metavar': meta or None,
             'type': ARG_TYPE_MAP.get(meta.strip('<>')),
-            'help': normalize_spaces(value).rstrip(),
+            'help': value.rstrip(),
         })
     return paramdocs
 
