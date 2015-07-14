@@ -1,27 +1,27 @@
 mando: CLI interfaces for Humans!
 =================================
 
-.. image:: http://img.shields.io/travis/rubik/mando/master.svg?style=flat
+.. image:: https://img.shields.io/travis/rubik/mando/master.svg
     :alt: Travis-CI badge
     :target: https://travis-ci.org/rubik/mando
 
-.. image:: https://drone.io/github.com/rubik/mando/status.png
-    :alt: Drone badge
-    :target: https://drone.io/github.com/rubik/mando
-
-.. image:: http://img.shields.io/coveralls/rubik/mando/master.svg?style=flat
+.. image:: https://img.shields.io/coveralls/rubik/mando/master.svg
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/mando
 
-.. image:: https://pypip.in/v/mando/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/v/mando.svg
     :alt: Latest release
     :target: https://pypi.python.org/pypi/mando
 
-.. image:: https://pypip.in/d/mando/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/dm/mando.svg
     :alt: PyPI downloads count
     :target: https://pypi.python.org/pypi/mando
 
-.. image:: https://pypip.in/license/mando/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/format/mando.svg
+    :alt: Download format
+    :target: http://pythonwheels.com/
+
+.. image:: https://img.shields.io/pypi/l/mando.svg
     :alt: Mando license
     :target: https://pypi.python.org/pypi/mando/
 
