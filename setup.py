@@ -9,6 +9,7 @@ else:
     version = mando.__version__
     deps = []
 
+deps.append('sphinx')
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
     readme = fobj.read()

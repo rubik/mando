@@ -52,7 +52,7 @@ class Program(object):
             return func
         return wrapper
 
-    def _generate_command(self, func, name=None, *args, **kwargs):
+    def _generate_command(self, func, name=None, doctype='rest', *args, **kwargs):
         '''Generate argparse's subparser.
 
         :param func: The function to analyze.
@@ -67,27 +67,41 @@ class Program(object):
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
         doc = (inspect.getdoc(func) or '').strip() + '\n'
+        if doctype == 'numpy':
+            from sphinx.ext.napoleon import Config, NumpyDocstring
+            config = Config(napoleon_google_docstring=False,
+                            napoleon_use_rtype=False)
+            doc = str(NumpyDocstring(doc, config))
+        elif doctype == 'google':
+            from sphinx.ext.napoleon import Config, GoogleDocstring
+            config = Config(napoleon_numpy_docstring=False,
+                            napoleon_use_rtype=False)
+            doc = str(GoogleDocstring(doc, config))
+        elif doctype == 'rest':
+            pass
+        else:
+            raise ValueError('doctype must be one of "numpy", "google", or "rest"')
         cmd_help, cmd_desc = split_doc(purify_doc(doc))
         subparser = self.subparsers.add_parser(name,
                                                help=cmd_help or None,
                                                description=cmd_desc or None,
                                                **kwargs)
-        for a, kw in self.analyze_func(func, doc, argz, argspec.varargs):
+        params = find_param_docs(doc)
+        for a, kw in self.analyze_func(func, params, argz, argspec.varargs):
             subparser.add_argument(*a, **purify_kwargs(kw))
         subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
 
-    def analyze_func(self, func, doc, argz, varargs_name):
+    def analyze_func(self, func, params, argz, varargs_name):
         '''Analyze the given function, merging default arguments, overridden
         arguments (with @arg) and parameters extracted from the docstring.
 
         :param func: The function to analyze.
-        :param doc: The function's docstring.
+        :param params: Parameters extracted from docstring.
         :param argz: A list of the form (arg, default), containing arguments
             and their default value.
         :param varargs_name: The name of the variable arguments, if present,
             otherwise ``None``.'''
-        params = find_param_docs(doc)
         for arg, default in argz:
             override = getattr(func, '_argopts', {}).get(arg, ((), {}))
             yield merge(arg, default, override, *params.get(arg, ([], {})))
