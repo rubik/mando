@@ -62,41 +62,39 @@ class Program(object):
         name = func_name if name is None else name
         argspec = inspect.getargspec(func)
         self.argspecs[func_name] = argspec
+        argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults
+                                                             or []),
+                            fillvalue=_POSITIONAL())
+        argz = reversed(list(argz))
         doc = (inspect.getdoc(func) or '').strip() + '\n'
         cmd_help, cmd_desc = split_doc(purify_doc(doc))
         subparser = self.subparsers.add_parser(name,
                                                help=cmd_help or None,
                                                description=cmd_desc or None,
                                                **kwargs)
-        for a, kw in self.analyze_func(func, doc, argspec):
+        for a, kw in self.analyze_func(func, doc, argz, argspec.varargs):
             subparser.add_argument(*a, **purify_kwargs(kw))
         subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
 
-    def analyze_func(self, func, doc, argspec):
+    def analyze_func(self, func, doc, argz, varargs_name):
         '''Analyze the given function, merging default arguments, overridden
         arguments (with @arg) and parameters extracted from the docstring.
 
         :param func: The function to analyze.
         :param doc: The function's docstring.
-        :param argspec: The result of ``inspect.getargspec``.'''
-        varargs = argspec.varargs
+        :param argz: A list of the form (arg, default), containing arguments
+            and their default value.
+        :param varargs_name: The name of the variable arguments, if present,
+            otherwise ``None``.'''
         params = find_param_docs(doc)
-        argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults
-                                                             or []),
-                            fillvalue=_POSITIONAL())
-        argz = reversed(list(argz))
         for arg, default in argz:
             override = getattr(func, '_argopts', {}).get(arg, ((), {}))
             yield merge(arg, default, override, *params.get(arg, ([], {})))
-        for arg in set(params.keys()).difference(argspec.args, [varargs]):
-            param = params[arg]
-            override = getattr(func, '_argopts', {}).get(arg, ((), {}))
-            yield merge(arg, param[1].get('default'), override, *param)
-        if varargs is not None:
+        if varargs_name is not None:
             kwargs = {'nargs': '*'}
-            kwargs.update(params.get(varargs, (None, {}))[1])
-            yield ([varargs], kwargs)
+            kwargs.update(params.get(varargs_name, (None, {}))[1])
+            yield ([varargs_name], kwargs)
 
     def parse(self, args):
         '''Parse the given arguments and return a tuple ``(command, args)``,
