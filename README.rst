@@ -155,4 +155,3 @@ You can put much more in the docstring, and if that isn't enough, there's an
 ``@arg`` decorator to customize the arguments that get passed to argparse.
 
 For a complete documentation, visit https://mando.readthedocs.org/.
-NOTE: Docs are still WIP!
