@@ -1,12 +1,13 @@
 import re
 
-SPHINX_RE = re.compile(r'^([\t ]*):'
-                       '(?P<fieldlist>param|type|returns|rtype|parameter|arg|argument|key|keyword)'
-                       ' ?(?P<var1>[-\w_]+,?)?'
-                       ' ?(?P<var2>[-<>\w_]+)?'
-                       ' ?(?P<var3>[<>\w_]+)?:'
-                       '(?P<help>[^\n]*\n(\1[ \t]+[^\n]*\n)*)',
-                       re.MULTILINE)
+SPHINX_RE = re.compile(
+    r'^([\t ]*):'
+    r'(?P<field>param|type|returns|rtype|parameter|arg|argument|key|keyword)'
+    r' ?(?P<var1>[-\w_]+,?)?'
+    r' ?(?P<var2>[-<>\w_]+)?'
+    r' ?(?P<var3>[<>\w_]+)?:'
+    r'(?P<help>[^\n]*\n(\1[ \t]+[^\n]*\n)*)',
+    re.MULTILINE)
 ARG_RE = re.compile(r'-(?P<long>-)?(?P<key>(?(long)[^ =,]+|.))[ =]?'
                     '(?P<meta>[^ ,]+)?')
 POS_RE = re.compile(r'(?P<meta>[^ ,]+)?')
@@ -50,12 +51,12 @@ def find_param_docs(docstring):
     paramdocs = {}
     typedocs = {}
     for m in SPHINX_RE.finditer(docstring + '\n'):
-        if m.group('fieldlist') in ['param',
-                                    'parameter',
-                                    'arg',
-                                    'argument',
-                                    'key',
-                                    'keyword']:
+        if m.group('field') in ['param',
+                                'parameter',
+                                'arg',
+                                'argument',
+                                'key',
+                                'keyword']:
             # mando
             #     :param name: Help text.               name   None   None    0
             #     :param name <type>: Help text.        name   <type> None    1
@@ -75,7 +76,8 @@ def find_param_docs(docstring):
             if m.group('var2') is None:  # 0, 2, 4, 8
                 vname = m.group('var1')
                 vtype = None
-            elif m.group('var2') is not None and '<' in m.group('var2'):  # 1, 3, 5
+            # 1, 3, 5
+            elif m.group('var2') is not None and '<' in m.group('var2'):
                 vname = m.group('var1')
                 vtype = m.group('var2')
             elif '-' in m.group('var1') and '-' in m.group('var2'):  # 6, 7
@@ -86,14 +88,14 @@ def find_param_docs(docstring):
                 vtype = m.group('var1')
 
             name, opts, meta = get_opts('{0} {1}'.format(vname.strip(),
-                                                         vtype or ""))
+                                                         vtype or ''))
             name = name.replace('-', '_')
             paramdocs[name] = (opts, {
                 'metavar': meta or None,
                 'type': ARG_TYPE_MAP.get(meta.strip('<>')),
                 'help': m.group('help').strip(),
             })
-        elif m.group('fieldlist') == 'type':
+        elif m.group('field') == 'type':
             typedocs[m.group('var1').strip()] = m.group('help').strip()
     for key in typedocs:
         paramdocs[key][1]['type'] = ARG_TYPE_MAP.get(typedocs[key])

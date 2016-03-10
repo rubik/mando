@@ -1,18 +1,17 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-"""
+'''
 Capture function
 ----------------------------------
 
-"""
+'''
 
-from contextlib import contextmanager
 import sys
+from contextlib import contextmanager
 
 try:
     from cStringIO import StringIO
-except:
+except ImportError:
     from io import StringIO
 
 
@@ -25,4 +24,3 @@ def capture_sys_output():
         yield capture_out, capture_err
     finally:
         sys.stdout, sys.stderr = current_out, current_err
-

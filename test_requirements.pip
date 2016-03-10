@@ -2,3 +2,4 @@ python-coveralls
 paramunittest
 coverage
 tox
+sphinx

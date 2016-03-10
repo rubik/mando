@@ -9,6 +9,9 @@ try:
     from itertools import izip_longest
 except ImportError:  # pragma: no cover
     from itertools import zip_longest as izip_longest
+
+from sphinx.ext.napoleon import Config, GoogleDocstring, NumpyDocstring
+
 from mando.utils import (purify_doc, action_by_type, find_param_docs,
                          split_doc, ensure_dashes, purify_kwargs)
 
@@ -52,7 +55,8 @@ class Program(object):
             return func
         return wrapper
 
-    def _generate_command(self, func, name=None, doctype='rest', *args, **kwargs):
+    def _generate_command(self, func, name=None, doctype='rest',
+                          *args, **kwargs):
         '''Generate argparse's subparser.
 
         :param func: The function to analyze.
@@ -62,25 +66,24 @@ class Program(object):
         name = func_name if name is None else name
         argspec = inspect.getargspec(func)
         self.argspecs[func_name] = argspec
-        argz = izip_longest(reversed(argspec.args), reversed(argspec.defaults
-                                                             or []),
+        argz = izip_longest(reversed(argspec.args),
+                            reversed(argspec.defaults or []),
                             fillvalue=_POSITIONAL())
         argz = reversed(list(argz))
         doc = (inspect.getdoc(func) or '').strip() + '\n'
         if doctype == 'numpy':
-            from sphinx.ext.napoleon import Config, NumpyDocstring
             config = Config(napoleon_google_docstring=False,
                             napoleon_use_rtype=False)
             doc = str(NumpyDocstring(doc, config))
         elif doctype == 'google':
-            from sphinx.ext.napoleon import Config, GoogleDocstring
             config = Config(napoleon_numpy_docstring=False,
                             napoleon_use_rtype=False)
             doc = str(GoogleDocstring(doc, config))
         elif doctype == 'rest':
             pass
         else:
-            raise ValueError('doctype must be one of "numpy", "google", or "rest"')
+            raise ValueError('doctype must be one of "numpy", "google", '
+                             'or "rest"')
         cmd_help, cmd_desc = split_doc(purify_doc(doc))
         subparser = self.subparsers.add_parser(name,
                                                help=cmd_help or None,
