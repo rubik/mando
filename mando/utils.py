@@ -1,7 +1,12 @@
 import re
 
-PARAM_RE = re.compile(r"^([\t ]*):param (.*?): ([^\n]*\n(\1[ \t]+[^\n]*\n)*)",
-                      re.MULTILINE)
+SPHINX_RE = re.compile(r'^([\t ]*):'
+                       '(?P<fieldlist>param|type|returns|rtype|parameter|arg|argument|key|keyword)'
+                       ' ?(?P<var1>[-\w_]+,?)?'
+                       ' ?(?P<var2>[-<>\w_]+)?'
+                       ' ?(?P<var3>[<>\w_]+)?:'
+                       '(?P<help>[^\n]*\n(\1[ \t]+[^\n]*\n)*)',
+                       re.MULTILINE)
 ARG_RE = re.compile(r'-(?P<long>-)?(?P<key>(?(long)[^ =,]+|.))[ =]?'
                     '(?P<meta>[^ ,]+)?')
 POS_RE = re.compile(r'(?P<meta>[^ ,]+)?')
@@ -15,8 +20,8 @@ ARG_TYPE_MAP = {
 
 
 def purify_doc(string):
-    '''Remove Sphinx's :param: lines from the docstring.'''
-    return PARAM_RE.sub('', string).rstrip()
+    '''Remove Sphinx's :param: and :type: lines from the docstring.'''
+    return SPHINX_RE.sub('', string).rstrip()
 
 
 def split_doc(string):
@@ -39,17 +44,59 @@ def purify_kwargs(kwargs):
 
 
 def find_param_docs(docstring):
-    '''Find Sphinx's :param: lines and return a dictionary of the form:
-        ``param: (opts, {metavar: meta, type: type, help: help})``.'''
+    '''Find Sphinx's :param:, :type:, :returns:, and :rtype: lines and return
+       a dictionary of the form:
+       ``param: (opts, {metavar: meta, type: type, help: help})``.'''
     paramdocs = {}
-    for _, param, value, _ in PARAM_RE.findall(docstring + '\n'):
-        name, opts, meta = get_opts(param.strip())
-        name = name.replace('-', '_')
-        paramdocs[name] = (opts, {
-            'metavar': meta or None,
-            'type': ARG_TYPE_MAP.get(meta.strip('<>')),
-            'help': value.rstrip(),
-        })
+    typedocs = {}
+    for m in SPHINX_RE.finditer(docstring + '\n'):
+        if m.group('fieldlist') in ['param',
+                                    'parameter',
+                                    'arg',
+                                    'argument',
+                                    'key',
+                                    'keyword']:
+            # mando
+            #     :param name: Help text.               name   None   None    0
+            #     :param name <type>: Help text.        name   <type> None    1
+            #     :param -n: Help text.                 -n     None   None    2
+            #     :param -n <type>: Help text.          -n     <type> None    3
+            #     :param --name: Help text.             --name None   None    4
+            #     :param --name <type>: Help text.      --name <type> None    5
+            #     :param -n, --name: Help text.         -n,    --name None    6
+            #     :param -n, --name <type>: Help text.  -n,    --name <type>  7
+            # sphinx
+            #     :param name: Help text.               name   None   None    8
+            #     :param type name: Help text.          type   name   None    9
+            #     :type name: str
+
+            # The following is ugly, but it allows for backward compatibility
+
+            if m.group('var2') is None:  # 0, 2, 4, 8
+                vname = m.group('var1')
+                vtype = None
+            elif m.group('var2') is not None and '<' in m.group('var2'):  # 1, 3, 5
+                vname = m.group('var1')
+                vtype = m.group('var2')
+            elif '-' in m.group('var1') and '-' in m.group('var2'):  # 6, 7
+                vname = '{0} {1}'.format(m.group('var1'), m.group('var2'))
+                vtype = m.group('var3')
+            else:                        # 9
+                vname = m.group('var2')
+                vtype = m.group('var1')
+
+            name, opts, meta = get_opts('{0} {1}'.format(vname.strip(),
+                                                         vtype or ""))
+            name = name.replace('-', '_')
+            paramdocs[name] = (opts, {
+                'metavar': meta or None,
+                'type': ARG_TYPE_MAP.get(meta.strip('<>')),
+                'help': m.group('help').strip(),
+            })
+        elif m.group('fieldlist') == 'type':
+            typedocs[m.group('var1').strip()] = m.group('help').strip()
+    for key in typedocs:
+        paramdocs[key][1]['type'] = ARG_TYPE_MAP.get(typedocs[key])
     return paramdocs
 
 
