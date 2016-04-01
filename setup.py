@@ -4,11 +4,15 @@ try:
     import mando
 except ImportError as e:
     version = e.version
-    deps = ['argparse']
 else:
     version = mando.__version__
-    deps = []
 
+deps = []
+try:
+    # Will fail with 2.6
+    import argparse
+except ImportError:
+    deps.append('argparse')
 deps.append('sphinx')
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
