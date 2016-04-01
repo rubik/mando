@@ -39,7 +39,7 @@ class TestGenericCommands(unittest.TestCase):
 @parametrized(
     ('simple_google_docstring --help 2 --arg2=test', '''usage: example.py simple_google_docstring [-h] [--arg2 ARG2] arg1
 
-Extended description. Description of return value.
+Extended description.
 
 positional arguments:
   arg1         Description of `arg1`
