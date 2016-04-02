@@ -6,11 +6,14 @@ SPHINX_RE = re.compile(
     r' ?(?P<var1>[-\w_]+,?)?'
     r' ?(?P<var2>[-<>\w_]+)?'
     r' ?(?P<var3>[<>\w_]+)?:'
-    r'(?P<help>[^\n]*\n(\1[ \t]+[^\n]*\n)*)',
+    r'(?P<help>[^\n]*\n((\1[ \t]+[^\n]*\n)|\n)*)',
     re.MULTILINE)
-ARG_RE = re.compile(r'-(?P<long>-)?(?P<key>(?(long)[^ =,]+|.))[ =]?'
-                    '(?P<meta>[^ ,]+)?')
-POS_RE = re.compile(r'(?P<meta>[^ ,]+)?')
+ARG_RE = re.compile(
+    r'-(?P<long>-)?'
+    r'(?P<key>(?(long)[^ =,]+|.))[ =]?'
+    r'(?P<meta>[^ ,]+)?')
+POS_RE = re.compile(
+    r'(?P<meta>[^ ,]+)?')
 ARG_TYPE_MAP = {
     'n': int, 'num': int, 'number': int,
     'i': int, 'int': int, 'integer': int,
