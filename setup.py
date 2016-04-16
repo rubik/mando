@@ -30,7 +30,7 @@ setup(name='mando',
       long_description=readme,
       packages=['mando', 'mando.tests'],
       install_requires=deps,
-      extras_require={'restructuredText': ['rst2ansi'],}
+      extras_require={'restructuredText': ['rst2ansi'],},
       test_suite='mando.tests',
       keywords='argparse,argument parser,arguments,cli,command line,'
                'commands,decorator,dispatch,flags,getopt,options,optparse,'
