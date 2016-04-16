@@ -1,4 +1,5 @@
 import re
+import textwrap
 
 SPHINX_RE = re.compile(
     r'^([\t ]*):'
@@ -6,7 +7,7 @@ SPHINX_RE = re.compile(
     r' ?(?P<var1>[-\w_]+,?)?'
     r' ?(?P<var2>[-<>\w_]+)?'
     r' ?(?P<var3>[<>\w_]+)?:'
-    r'(?P<help>[^\n]*\n((\1[ \t]+[^\n]*\n)|\n)*)',
+    r'(?P<help>[^\n]*\n+((\1[ \t]+[^\n]*\n)|\n)*)',
     re.MULTILINE)
 ARG_RE = re.compile(
     r'-(?P<long>-)?'
@@ -93,10 +94,17 @@ def find_param_docs(docstring):
             name, opts, meta = get_opts('{0} {1}'.format(vname.strip(),
                                                          vtype or ''))
             name = name.replace('-', '_')
+
+            helpdoc = m.group('help').strip()
+            helpdoc = helpdoc.splitlines(True)
+            if len(helpdoc) > 1:
+                helpdoc = helpdoc[0] + textwrap.dedent(''.join(helpdoc[1:]))
+            else:
+                helpdoc = helpdoc[0]
             paramdocs[name] = (opts, {
                 'metavar': meta or None,
                 'type': ARG_TYPE_MAP.get(meta.strip('<>')),
-                'help': m.group('help').strip(),
+                'help': helpdoc,
             })
         elif m.group('field') == 'type':
             typedocs[m.group('var1').strip()] = m.group('help').strip()
