@@ -1,9 +1,9 @@
 from mando import command, main
 
 @command
-def echo(text, capitalyze=False):
+def echo(text, capitalize=False):
     '''Echo the given text.'''
-    if capitalyze:
+    if capitalize:
         text = text.upper()
     print text
 
