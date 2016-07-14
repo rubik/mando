@@ -43,8 +43,8 @@ Quickstart
     from mando import command, main
 
     @command
-    def echo(text, capitalyze=False):
-        if capitalyze:
+    def echo(text, capitalize=False):
+        if capitalize:
             text = text.upper()
         print(text)
 
@@ -66,7 +66,7 @@ Generated help:
       -h, --help  show this help message and exit
 
     $ python example.py echo -h
-    usage: example.py echo [-h] [--capitalyze] text
+    usage: example.py echo [-h] [--capitalize] text
 
     Echo the given text.
 
@@ -75,7 +75,7 @@ Generated help:
 
     optional arguments:
       -h, --help    show this help message and exit
-      --capitalyze
+      --capitalize
 
 Actual usage:
 
@@ -83,7 +83,7 @@ Actual usage:
 
     $ python example.py echo spam
     spam
-    $ python example.py echo --capitalyze spam
+    $ python example.py echo --capitalize spam
     SPAM
 
 

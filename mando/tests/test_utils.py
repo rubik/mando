@@ -85,9 +85,9 @@ for a in (a_1, a_2, a_3):
     dict(doc='''
          Lemme see.
 
-         :param long-story: A long storey belive me: when all started, Adam and Bob were just two little farmers.
-         ''', params={'long_story': (['long-story'], {'help': 'A long storey '\
-                                     'belive me: when all started, Adam and '\
+         :param long-story: A long story believe me: when all started, Adam and Bob were just two little farmers.
+         ''', params={'long_story': (['long-story'], {'help': 'A long story '\
+                                     'believe me: when all started, Adam and '\
                                      'Bob were just two little farmers.'})}),
 )
 class TestFindParamDocs(unittest.TestCase):
