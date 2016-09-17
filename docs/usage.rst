@@ -244,7 +244,6 @@ this. Its signature is as follows: ``@arg(arg_name, *args, **kwargs)``, where
 arguments will be directly passed to ``argparse.add_argument()``.
 Note that this decorator will override other arguments that mando inferred
 either from the defaults or from the docstring.
-the docstring
 
 
 Aliasing commands
