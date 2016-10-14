@@ -30,6 +30,25 @@ class Program(object):
         self.subparsers = self.parser.add_subparsers()
         self.argspecs = {}
         self.current_command = None
+        self.options = None
+
+    @property
+    def name(self):
+        return self.parser.prog
+
+    # Add global script options.
+    def option(self, *args, **kwd):
+        assert args and all(arg.startswith('-') for arg in args), \
+            "Positional arguments not supported here"
+        completer = kwd.pop('completer', None)
+        arg = self.parser.add_argument(*args, **kwd)
+        if completer is not None:
+            arg.completer = completer
+        return arg
+
+    # Attribute lookup fallback redirecting to (internal) options instance.
+    def __getattr__(self, attr):
+        return getattr(self.options, attr)
 
     def command(self, *args, **kwargs):
         '''A decorator to convert a function into a command. It can be applied
@@ -91,7 +110,11 @@ class Program(object):
                                                **kwargs)
         params = find_param_docs(doc)
         for a, kw in self.analyze_func(func, params, argz, argspec.varargs):
-            subparser.add_argument(*a, **purify_kwargs(kw))
+            completer = kw.pop('completer', None)
+            arg = subparser.add_argument(*a, **purify_kwargs(kw))
+            if completer is not None:
+                arg.completer = completer
+
         subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
 
@@ -119,7 +142,16 @@ class Program(object):
         then be called as ``command(*args)``.
 
         :param args: The arguments to parse.'''
-        arg_map = self.parser.parse_args(args).__dict__
+        try:
+            # run completion handler before parsing
+            import argcomplete
+            argcomplete.autocomplete(self.parser)
+        except ImportError:  # pragma: no cover
+            # ignore error if not installed
+            pass
+
+        self.options = self.parser.parse_args(args)
+        arg_map = self.options.__dict__
         command = arg_map.pop(_DISPATCH_TO)
         argspec = self.argspecs[command.__name__]
         real_args = []
