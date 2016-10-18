@@ -33,7 +33,7 @@ class TestGenericCommands(unittest.TestCase):
     def testExecute(self):
         self.assertEqual(self.result, program.execute(self.args))
         self.assertEqual(program.parse(self.args)[0].__name__,
-                         program.current_command)
+                         program._current_command)
 
 
 @parametrized(
