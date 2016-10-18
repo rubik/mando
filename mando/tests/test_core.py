@@ -5,6 +5,25 @@ from mando import Program
 
 program = Program('example.py', '1.0.10')
 
+def NoopCompleter(prefix, **kwd):
+    return []
+
+program.option(
+    "-f", "--foo", dest='foo', default='bar', completer=NoopCompleter,
+    help="Real programmers don't comment their code. \
+          If it was hard to write, it should be hard to read."
+)
+
+
+@program.command
+def getopt(name):
+    '''
+        :param name: Name of option to return.
+    '''
+    # also allows for: Script.foo
+    return getattr(program, name)
+
+
 @program.command
 def goo(pos, verbose=False, bar=None):
     pass
@@ -50,7 +69,7 @@ def more_power(x, y=2):
 
 
 @program.command('more-powerful')
-@program.arg('x', type=int)
+@program.arg('x', type=int, completer=NoopCompleter)
 @program.arg('y', '-y', '--epsilon', type=int)
 def more_power_2(x, y=2):
     return x ** y
@@ -149,4 +168,20 @@ class TestProgramExecute(unittest.TestCase):
     def testExecute(self):
         self.assertEqual(self.result, program.execute(self.args))
         self.assertEqual(program.parse(self.args)[0].__name__,
-                         program.current_command)
+                         program._current_command)
+
+
+@parametrized(
+    ('getopt foo', 'bar'),
+    ('-f xyz getopt foo', 'xyz'),
+    ('--foo xyz getopt foo', 'xyz'),
+)
+class TestProgramOptions(unittest.TestCase):
+    def setParameters(self, args, result):
+        self.args   = args.split()
+        self.result = result
+
+    def testExecute(self):
+        self.assertEqual("example.py", program.name)
+        self.assertEqual(self.result, program.execute(self.args))
+

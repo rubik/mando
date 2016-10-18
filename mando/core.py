@@ -27,9 +27,28 @@ class Program(object):
         if version is not None:
             self.parser.add_argument('-v', '--version', action='version',
                                      version=version)
-        self.subparsers = self.parser.add_subparsers()
-        self.argspecs = {}
-        self.current_command = None
+        self._subparsers = self.parser.add_subparsers()
+        self._argspecs = {}
+        self._current_command = None
+        self._options = None
+
+    @property
+    def name(self):
+        return self.parser.prog
+
+    # Add global script options.
+    def option(self, *args, **kwd):
+        assert args and all(arg.startswith('-') for arg in args), \
+            "Positional arguments not supported here"
+        completer = kwd.pop('completer', None)
+        arg = self.parser.add_argument(*args, **kwd)
+        if completer is not None:
+            arg.completer = completer
+        return arg
+
+    # Attribute lookup fallback redirecting to (internal) options instance.
+    def __getattr__(self, attr):
+        return getattr(self._options, attr)
 
     def command(self, *args, **kwargs):
         '''A decorator to convert a function into a command. It can be applied
@@ -65,7 +84,7 @@ class Program(object):
         func_name = func.__name__
         name = func_name if name is None else name
         argspec = inspect.getargspec(func)
-        self.argspecs[func_name] = argspec
+        self._argspecs[func_name] = argspec
         argz = izip_longest(reversed(argspec.args),
                             reversed(argspec.defaults or []),
                             fillvalue=_POSITIONAL())
@@ -85,17 +104,21 @@ class Program(object):
             raise ValueError('doctype must be one of "numpy", "google", '
                              'or "rest"')
         cmd_help, cmd_desc = split_doc(purify_doc(doc))
-        subparser = self.subparsers.add_parser(name,
-                                               help=cmd_help or None,
-                                               description=cmd_desc or None,
-                                               **kwargs)
+        subparser = self._subparsers.add_parser(name,
+                                                help=cmd_help or None,
+                                                description=cmd_desc or None,
+                                                **kwargs)
         params = find_param_docs(doc)
-        for a, kw in self.analyze_func(func, params, argz, argspec.varargs):
-            subparser.add_argument(*a, **purify_kwargs(kw))
+        for a, kw in self._analyze_func(func, params, argz, argspec.varargs):
+            completer = kw.pop('completer', None)
+            arg = subparser.add_argument(*a, **purify_kwargs(kw))
+            if completer is not None:
+                arg.completer = completer
+
         subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
 
-    def analyze_func(self, func, params, argz, varargs_name):
+    def _analyze_func(self, func, params, argz, varargs_name):
         '''Analyze the given function, merging default arguments, overridden
         arguments (with @arg) and parameters extracted from the docstring.
 
@@ -119,9 +142,21 @@ class Program(object):
         then be called as ``command(*args)``.
 
         :param args: The arguments to parse.'''
-        arg_map = self.parser.parse_args(args).__dict__
+        try:
+            # run completion handler before parsing
+            import argcomplete
+            argcomplete.autocomplete(self.parser)
+        except ImportError:  # pragma: no cover
+            # ignore error if not installed
+            pass
+
+        self._options = self.parser.parse_args(args)
+        arg_map = self._options.__dict__
+        if _DISPATCH_TO not in arg_map:  # pragma: no cover
+            self.parser.error("too few arguments")
+
         command = arg_map.pop(_DISPATCH_TO)
-        argspec = self.argspecs[command.__name__]
+        argspec = self._argspecs[command.__name__]
         real_args = []
         for arg in argspec.args:
             real_args.append(arg_map.pop(arg))
@@ -134,7 +169,7 @@ class Program(object):
 
         :param args: The arguments to parse.'''
         command, a = self.parse(args)
-        self.current_command = command.__name__
+        self._current_command = command.__name__
         return command(*a)
 
     def __call__(self):  # pragma: no cover

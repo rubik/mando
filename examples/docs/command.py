@@ -10,7 +10,7 @@ def cmd(foo, bar):
     :param foo: Well, the first arg.
     :param bar: Obviously the second arg. Nonsense.'''
 
-    print(arg, bar)
+    print(foo, bar)
 
 
 if __name__ == '__main__':
