@@ -152,6 +152,9 @@ class Program(object):
 
         self._options = self.parser.parse_args(args)
         arg_map = self._options.__dict__
+        if _DISPATCH_TO not in arg_map:
+            self.parser.error("too few arguments")
+
         command = arg_map.pop(_DISPATCH_TO)
         argspec = self._argspecs[command.__name__]
         real_args = []
