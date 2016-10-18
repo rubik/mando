@@ -152,7 +152,7 @@ class Program(object):
 
         self._options = self.parser.parse_args(args)
         arg_map = self._options.__dict__
-        if _DISPATCH_TO not in arg_map:
+        if _DISPATCH_TO not in arg_map:  # pragma: no cover
             self.parser.error("too few arguments")
 
         command = arg_map.pop(_DISPATCH_TO)
