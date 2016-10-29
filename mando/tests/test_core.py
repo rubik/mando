@@ -14,6 +14,12 @@ program.option(
           If it was hard to write, it should be hard to read."
 )
 
+program.subprog('sub')
+program.sub.option(
+    "-i", "--inc", dest='inc', type=int, default=0,
+    help="Some help text."
+)
+
 
 @program.command
 def getopt(name):
@@ -22,6 +28,24 @@ def getopt(name):
     '''
     # also allows for: Script.foo
     return getattr(program, name)
+
+
+@program.sub.command
+def powOfSub(b, e):
+    '''
+        :param b: Base.
+        :param e: Exponent.
+    '''
+    return int(b) ** int(e) + program.inc
+
+
+@program.sub.command('powOfSub2')
+def powOfSub2_impl(b, e):
+    '''
+        :param b: Base.
+        :param e: Exponent.
+    '''
+    return int(b) ** int(e) - program.inc
 
 
 @program.command
@@ -172,9 +196,15 @@ class TestProgramExecute(unittest.TestCase):
 
 
 @parametrized(
-    ('getopt foo', 'bar'),
-    ('-f xyz getopt foo', 'xyz'),
+    ('          getopt foo', 'bar'),
+    ('   -f xyz getopt foo', 'xyz'),
     ('--foo xyz getopt foo', 'xyz'),
+    ('          sub         powOfSub  2 3', 8),
+    ('   -f xyz sub    -i 1 powOfSub  2 3', 9),
+    ('--foo xyz sub --inc 2 powOfSub  2 3', 10),
+    ('          sub         powOfSub2 2 3', 8),
+    ('   -f xyz sub    -i 1 powOfSub2 2 3', 7),
+    ('--foo xyz sub --inc 2 powOfSub2 2 3', 6),
 )
 class TestProgramOptions(unittest.TestCase):
     def setParameters(self, args, result):

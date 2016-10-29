@@ -20,17 +20,12 @@ _POSITIONAL = type('_positional', (object,), {})
 _DISPATCH_TO = '_dispatch_to'
 
 
-class Program(object):
+class SubProgram(object):
 
-    def __init__(self, prog=None, version=None, **kwargs):
-        self.parser = argparse.ArgumentParser(prog, **kwargs)
-        if version is not None:
-            self.parser.add_argument('-v', '--version', action='version',
-                                     version=version)
+    def __init__(self, parser, argspecs):
+        self.parser      = parser
         self._subparsers = self.parser.add_subparsers()
-        self._argspecs = {}
-        self._current_command = None
-        self._options = None
+        self._argspecs   = argspecs
 
     @property
     def name(self):
@@ -44,11 +39,18 @@ class Program(object):
         arg = self.parser.add_argument(*args, **kwd)
         if completer is not None:
             arg.completer = completer
+        # do not attempt to shadow existing attributes
+        assert not hasattr(self, arg.dest), "Invalid option attribute: " + arg.dest
         return arg
 
-    # Attribute lookup fallback redirecting to (internal) options instance.
-    def __getattr__(self, attr):
-        return getattr(self._options, attr)
+    def subprog(self, name, **kwd):
+        # also always provide help= to fix missing entry in command list
+        help = kwd.pop('help', "{} subcommand".format(name))
+        prog = SubProgram(self._subparsers.add_parser(name, help=help, **kwd), self._argspecs)
+        # do not attempt to overwrite existing attributes
+        assert not hasattr(self, name), "Invalid sub-prog name: " + name
+        setattr(self, name, prog)
+        return prog
 
     def command(self, *args, **kwargs):
         '''A decorator to convert a function into a command. It can be applied
@@ -135,6 +137,23 @@ class Program(object):
             kwargs = {'nargs': '*'}
             kwargs.update(params.get(varargs_name, (None, {}))[1])
             yield ([varargs_name], kwargs)
+
+
+class Program(SubProgram):
+
+    def __init__(self, prog=None, version=None, **kwargs):
+        parser = argparse.ArgumentParser(prog, **kwargs)
+        if version is not None:
+            parser.add_argument('-v', '--version', action='version',
+                                version=version)
+
+        super(Program, self).__init__(parser, dict())
+        self._options = None
+        self._current_command = None
+
+    # Attribute lookup fallback redirecting to (internal) options instance.
+    def __getattr__(self, attr):
+        return getattr(self._options, attr)
 
     def parse(self, args):
         '''Parse the given arguments and return a tuple ``(command, args)``,
