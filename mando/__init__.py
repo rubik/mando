@@ -9,7 +9,6 @@ except ImportError as e:  # pragma: no cover
 
 main = Program()
 command = main.command
-option = main.option
 arg = main.arg
 parse = main.parse
 execute = main.execute
