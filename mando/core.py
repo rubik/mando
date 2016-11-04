@@ -193,7 +193,7 @@ class Program(SubProgram):
 
     def __call__(self):  # pragma: no cover
         '''Parse ``sys.argv`` and execute the resulting command.'''
-        self.execute(sys.argv[1:])
+        return self.execute(sys.argv[1:])
 
 
 def merge(arg, default, override, args, kwargs):
