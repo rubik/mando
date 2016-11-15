@@ -14,7 +14,7 @@ program.option(
           If it was hard to write, it should be hard to read."
 )
 
-program.subprog('sub')
+program.add_subprog('sub')
 program.sub.option(
     "-i", "--inc", dest='inc', type=int, default=0,
     help="Some help text."

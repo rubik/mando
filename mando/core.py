@@ -43,7 +43,7 @@ class SubProgram(object):
         assert not hasattr(self, arg.dest), "Invalid option attribute: " + arg.dest
         return arg
 
-    def subprog(self, name, **kwd):
+    def add_subprog(self, name, **kwd):
         # also always provide help= to fix missing entry in command list
         help = kwd.pop('help', "{} subcommand".format(name))
         prog = SubProgram(self._subparsers.add_parser(name, help=help, **kwd), self._argspecs)
