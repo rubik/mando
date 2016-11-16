@@ -23,4 +23,3 @@ class RSTHelpFormatter(argparse.RawTextHelpFormatter):
 
     def format_usage(self):
         return rst2ansi(b(super(RSTHelpFormatter, self).format_usage())) + '\n'
-
