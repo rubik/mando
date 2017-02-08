@@ -19,7 +19,14 @@ class RSTHelpFormatter(argparse.RawTextHelpFormatter):
     """
     """
     def format_help(self):
-        return rst2ansi(b(super(RSTHelpFormatter, self).format_help())) + '\n'
+        ret = rst2ansi(b(super(RSTHelpFormatter, self).format_help())
+                       + '\n')
+        return ret.encode(sys.stdout.encoding,
+                          'replace').decode(sys.stdout.encoding)
 
     def format_usage(self):
-        return rst2ansi(b(super(RSTHelpFormatter, self).format_usage())) + '\n'
+        ret = rst2ansi(b(super(RSTHelpFormatter, self).format_usage())
+                       + '\n')
+        return ret.encode(sys.stdout.encoding,
+                          'replace').decode(sys.stdout.encoding)
+
