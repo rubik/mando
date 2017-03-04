@@ -245,9 +245,19 @@ arguments will be directly passed to ``argparse.add_argument()``.
 Note that this decorator will override other arguments that mando inferred
 either from the defaults or from the docstring.
 
+``@command`` Arguments
+----------------------
 
-Aliasing commands
------------------
+There are three special arguments to the ``@command()`` decorator to allow for 
+special processing for the decorated function.  The first argument, also 
+available as keyword "name='alias_name'" will allow for an alias of the 
+command.  The second argument, also available as keyword "doctype='rest'" 
+allows for Numpy or Google formatted docstrings to be used.  The third is only 
+available as keyword "formatter_class='argparse_formatter_class'" to format 
+the display of the docstring.
+
+Aliasing Commands
+~~~~~~~~~~~~~~~~~
 
 A common use-case for this is represented by a function with underscores in it.
 Usually commands have dashes instead. So, you may specify the aliasing name to
@@ -264,3 +274,75 @@ And call it as follows:
     $ python prog.py very-powerful-cmd 2 --verbose
 
 Note that the original name will be discarded and won't be usable.
+
+Other Docstring Formats
+~~~~~~~~~~~~~~~~~~~~~~~
+
+There are three commonly accepted formats for docstrings.  The Sphinx docstring,
+and the mando dialect of Sphinx described in this documentation are treated 
+equally and is the default documentation style named "rest" for REStructured 
+Text.  The other two available styles are "numpy" and "google".  This allows 
+projects that use mando, but already have docstrings in these other formats to 
+not have to convert the docstrings.
+
+An example of using a Numpy formatted docstring in mando::
+
+    @command(doctype='numpy')
+    def simple_numpy_docstring(arg1, arg2="string"):
+        '''One line summary.
+        
+        Extended description.
+        
+        Parameters
+        ----------
+        arg1 : int
+            Description of `arg1`
+        arg2 : str
+            Description of `arg2`
+            
+        Returns
+        -------
+        str
+            Description of return value.
+        '''
+        return int(arg1) * arg2
+
+An example of using a Google formatted docstring in mando::
+
+    @program.command(doctype='google')
+    def simple_google_docstring(arg1, arg2="string"):
+        '''One line summary.
+
+        Extended description.
+
+        Args:
+          arg1(int): Description of `arg1`
+          arg2(str): Description of `arg2`
+        Returns:
+          str: Description of return value.
+        '''
+        return int(arg1) * arg2
+
+
+Formatter Class
+~~~~~~~~~~~~~~~
+
+For the help display there is the opportunity to use special formatters.  Any argparse compatible formatter class can be used.  There is an alternative formatter class available with mando that will display on ANSI terminals.
+
+The ANSI formatter class has to be imported from mando and used as follows::
+
+    from mando.rst_text_formatter import RSTHelpFormatter
+    
+    @command(formatter_class=RSTHelpFormatter)
+    def pow(a, b, mod=None):
+        '''Mimic Python's pow() function.
+
+        :param a <float>: The base.
+        :param b <float>: The exponent.
+        :param -m, --mod <int>: Modulus.'''
+
+        if mod is not None:
+            print((a ** b) % mod)
+        else:
+            print(a ** b)
+
