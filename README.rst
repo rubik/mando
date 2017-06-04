@@ -28,6 +28,14 @@ mando: CLI interfaces for Humans!
 mando is a wrapper around ``argparse``, and allows you to write complete CLI
 applications in seconds while maintaining all the flexibility.
 
+Installation
+------------
+
+Mando is tested across all Python versions from **Python 2.6** to **Python
+3.6** and also on **Pypy**. You can install it with Pip:
+
+    $ pip install mando
+
 The problem
 -----------
 
@@ -154,4 +162,7 @@ Amazed uh? Yes, mando got the short options and the help from the docstring!
 You can put much more in the docstring, and if that isn't enough, there's an
 ``@arg`` decorator to customize the arguments that get passed to argparse.
 
-For a complete documentation, visit https://mando.readthedocs.org/.
+Mando has lots of other options. For example, it supports different docstring
+styes (Sphinx, Google and NumPy), supports shell autocompletion via the
+``argcomplete`` package and supports custom format classes. For a complete
+documentation, visit https://mando.readthedocs.org/.
