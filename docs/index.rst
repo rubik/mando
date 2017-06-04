@@ -55,7 +55,17 @@ This example should showcase most of mando's features::
         main()
 
 mando extracts information from your command's docstring. So you can document
-your code and create the CLI application at once! The first paragraph is taken
+your code and create the CLI application at once! In the above example the
+Sphinx format is used, but mando does not force you to write ReST docstrings.
+Currently, it supports the following styles:
+
+- Sphinx (the default one)
+- Google
+- Numpy
+
+To see how to specify the docstring format, see :ref:`docstring-style`.
+
+The first paragraph is taken
 to generate the command's *help*. The remaining part (after removing all
 ``:param:``'s) is the *description*. For everything that does not fit in the
 docstring, mando provides the ``@arg`` decorator, to override arbitrary

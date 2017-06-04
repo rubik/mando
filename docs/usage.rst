@@ -248,12 +248,12 @@ either from the defaults or from the docstring.
 ``@command`` Arguments
 ----------------------
 
-There are three special arguments to the ``@command()`` decorator to allow for 
-special processing for the decorated function.  The first argument, also 
-available as keyword "name='alias_name'" will allow for an alias of the 
-command.  The second argument, also available as keyword "doctype='rest'" 
-allows for Numpy or Google formatted docstrings to be used.  The third is only 
-available as keyword "formatter_class='argparse_formatter_class'" to format 
+There are three special arguments to the ``@command()`` decorator to allow for
+special processing for the decorated function. The first argument, also
+available as keyword ``name='alias_name'`` will allow for an alias of the
+command. The second argument, also available as keyword ``doctype='rest'``
+allows for Numpy or Google formatted docstrings to be used. The third is only
+available as keyword ``formatter_class='argparse_formatter_class'`` to format
 the display of the docstring.
 
 Aliasing Commands
@@ -275,31 +275,34 @@ And call it as follows:
 
 Note that the original name will be discarded and won't be usable.
 
+
+.. _docstring-style:
+
 Other Docstring Formats
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-There are three commonly accepted formats for docstrings.  The Sphinx docstring,
-and the mando dialect of Sphinx described in this documentation are treated 
-equally and is the default documentation style named "rest" for REStructured 
-Text.  The other two available styles are "numpy" and "google".  This allows 
-projects that use mando, but already have docstrings in these other formats to 
-not have to convert the docstrings.
+There are three commonly accepted formats for docstrings. The Sphinx docstring,
+and the mando dialect of Sphinx described in this documentation are treated
+equally and is the default documentation style named ``rest`` for REStructured
+Text. The other two available styles are ``numpy`` and ``google``. This allows
+projects that use mando, but already have docstrings in these other formats not
+to have to convert the docstrings.
 
 An example of using a Numpy formatted docstring in mando::
 
     @command(doctype='numpy')
     def simple_numpy_docstring(arg1, arg2="string"):
         '''One line summary.
-        
+
         Extended description.
-        
+
         Parameters
         ----------
         arg1 : int
             Description of `arg1`
         arg2 : str
             Description of `arg2`
-            
+
         Returns
         -------
         str
@@ -327,12 +330,14 @@ An example of using a Google formatted docstring in mando::
 Formatter Class
 ~~~~~~~~~~~~~~~
 
-For the help display there is the opportunity to use special formatters.  Any argparse compatible formatter class can be used.  There is an alternative formatter class available with mando that will display on ANSI terminals.
+For the help display there is the opportunity to use special formatters. Any
+argparse compatible formatter class can be used. There is an alternative
+formatter class available with mando that will display on ANSI terminals.
 
 The ANSI formatter class has to be imported from mando and used as follows::
 
     from mando.rst_text_formatter import RSTHelpFormatter
-    
+
     @command(formatter_class=RSTHelpFormatter)
     def pow(a, b, mod=None):
         '''Mimic Python's pow() function.
@@ -346,3 +351,10 @@ The ANSI formatter class has to be imported from mando and used as follows::
         else:
             print(a ** b)
 
+
+Shell autocompletion
+--------------------
+
+Mando supports autocompletion via the optional dependency ``argcomplete``. If
+that package is installed, mando detects it automatically without the need to
+do anything else.
