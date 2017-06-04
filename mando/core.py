@@ -10,7 +10,7 @@ try:
 except ImportError:  # pragma: no cover
     from itertools import zip_longest as izip_longest
 
-from sphinx.ext.napoleon import Config, GoogleDocstring, NumpyDocstring
+from mando.napoleon import Config, GoogleDocstring, NumpyDocstring
 
 from mando.utils import (purify_doc, action_by_type, find_param_docs,
                          split_doc, ensure_dashes, purify_kwargs)
