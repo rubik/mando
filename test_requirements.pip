@@ -2,4 +2,3 @@ python-coveralls
 pytest
 coverage
 tox
-sphinx
