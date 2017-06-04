@@ -4,7 +4,7 @@ tests:
 	python mando/tests/run.py
 
 cov:
-	coverage erase && coverage run --include "mando/*" --omit "mando/tests/*" mando/tests/run.py
+	coverage erase && coverage run --include "mando/*" --omit "mando/tests/*,mando/napoleon/*" mando/tests/run.py
 	coverage report -m
 
 htmlcov: cov

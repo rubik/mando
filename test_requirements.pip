@@ -1,5 +1,5 @@
 python-coveralls
-paramunittest
+pytest
 coverage
 tox
 sphinx
