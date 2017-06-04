@@ -32,7 +32,7 @@ Installation
 ------------
 
 Mando is tested across all Python versions from **Python 2.6** to **Python
-3.6** and also on **Pypy**. You can install it with Pip:
+3.6** and also on **Pypy**. You can install it with Pip::
 
     $ pip install mando
 
