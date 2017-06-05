@@ -13,10 +13,6 @@
 
 import collections
 
-if False:
-    # For type annotation
-    from typing import Any, Iterable  # NOQA
-
 
 class peek_iter(object):
     """An iterator object that supports peeking ahead.

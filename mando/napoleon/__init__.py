@@ -11,7 +11,7 @@
 
 from six import iteritems
 
-from sphinx.ext.napoleon.docstring import GoogleDocstring, NumpyDocstring
+from mando.napoleon.docstring import GoogleDocstring, NumpyDocstring
 
 
 class Config(object):

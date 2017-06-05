@@ -18,14 +18,8 @@ import re
 from six import string_types, u
 from six.moves import range
 
-from sphinx.ext.napoleon.iterators import modify_iter
-from sphinx.util.pycompat import UnicodeMixin
-
-if False:
-    # For type annotation
-    from typing import Any, Callable, Dict, List, Tuple, Union  # NOQA
-    from sphinx.application import Sphinx  # NOQA
-    from sphinx.config import Config as SphinxConfig  # NOQA
+from mando.napoleon.iterators import modify_iter
+from mando.napoleon.pycompat import UnicodeMixin
 
 
 _directive_regex = re.compile(r'\.\. \S+::')
