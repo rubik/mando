@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 try:
     import mando
 except ImportError as e:
@@ -27,7 +27,7 @@ setup(name='mando',
       description='Create Python CLI apps with little to no effort at all!',
       platforms='any',
       long_description=readme,
-      packages=['mando', 'mando.tests'],
+      packages=find_packages(),
       install_requires=deps,
       extras_require={'restructuredText': ['rst2ansi'],},
       test_suite='mando.tests',
