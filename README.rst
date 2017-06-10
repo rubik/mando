@@ -13,10 +13,6 @@ mando: CLI interfaces for Humans!
     :alt: Latest release
     :target: https://pypi.python.org/pypi/mando
 
-.. image:: https://img.shields.io/pypi/dm/mando.svg
-    :alt: PyPI downloads count
-    :target: https://pypi.python.org/pypi/mando
-
 .. image:: https://img.shields.io/pypi/format/mando.svg
     :alt: Download format
     :target: http://pythonwheels.com/
