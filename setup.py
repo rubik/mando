@@ -7,12 +7,11 @@ except ImportError as e:
 else:
     version = mando.__version__
 
-deps = ['six']
-try:
-    # Will fail with 2.6
-    import argparse
-except ImportError:
-    deps.append('argparse')
+deps = [
+    'six',
+    'argparse ; python_version<="2.6"',
+    'funcsigs ; python_version<="3.2"',
+]
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
     readme = fobj.read()

@@ -2,22 +2,18 @@
 ordinary Python functions into commands for the command line. It uses
 :py:module:``argparse`` behind the scenes.'''
 
-import sys
-import inspect
 import argparse
-try:
-    getfullargspec = inspect.getfullargspec
-except AttributeError:
-    getfullargspec = inspect.getargspec
-try:
-    from itertools import izip_longest
-except ImportError:  # pragma: no cover
-    from itertools import zip_longest as izip_longest
+import inspect
+import sys
 
 from mando.napoleon import Config, GoogleDocstring, NumpyDocstring
 
 from mando.utils import (purify_doc, action_by_type, find_param_docs,
                          split_doc, ensure_dashes, purify_kwargs)
+try:
+    from inspect import signature
+except ImportError:
+    from funcsigs import signature
 
 
 _POSITIONAL = type('_positional', (object,), {})
@@ -25,11 +21,10 @@ _DISPATCH_TO = '_dispatch_to'
 
 
 class SubProgram(object):
-
-    def __init__(self, parser, argspecs):
+    def __init__(self, parser, signatures):
         self.parser = parser
         self._subparsers = self.parser.add_subparsers()
-        self._argspecs = argspecs
+        self._signatures = signatures
 
     @property
     def name(self):
@@ -88,15 +83,10 @@ class SubProgram(object):
         :param func: The function to analyze.
         :param name: If given, a different name for the command. The default
             one is ``func.__name__``.'''
-        func_name = func.__name__
-        name = func_name if name is None else name
-        argspec = getfullargspec(func)
-        self._argspecs[func_name] = argspec
-        argz = izip_longest(reversed(argspec.args),
-                            reversed(argspec.defaults or []),
-                            fillvalue=_POSITIONAL())
-        argz = reversed(list(argz))
+
+        name = name or func.__name__
         doc = (inspect.getdoc(func) or '').strip() + '\n'
+
         if doctype == 'numpy':
             config = Config(napoleon_google_docstring=False,
                             napoleon_use_rtype=False)
@@ -131,21 +121,29 @@ class SubProgram(object):
 
         :param func: The function to analyze.
         :param params: Parameters extracted from docstring.
-        :param argz: A list of the form (arg, default), containing arguments
-            and their default value.
-        :param varargs_name: The name of the variable arguments, if present,
-            otherwise ``None``.'''
-        for arg, default in argz:
-            override = getattr(func, '_argopts', {}).get(arg, ((), {}))
-            yield merge(arg, default, override, *params.get(arg, ([], {})))
-        if varargs_name is not None:
-            kwargs = {'nargs': '*'}
-            kwargs.update(params.get(varargs_name, (None, {}))[1])
-            yield ([varargs_name], kwargs)
+        '''
+
+        sig = signature(func)
+        overrides = getattr(func, '_argopts', {})
+        for name, param in sig.parameters.items():
+
+            if param.kind is param.VAR_POSITIONAL:
+                kwargs = {'nargs': '*'}
+                kwargs.update(doc_params.get(name, (None, {}))[1])
+                yield ([name], kwargs)
+                continue
+
+            default = param.default
+            if default is sig.empty:
+                default = _POSITIONAL()
+
+            opts, meta = doc_params.get(name, ([], {}))
+
+            override = overrides.get(name, ((), {}))
+            yield merge(name, default, override, opts, meta)
 
 
 class Program(SubProgram):
-
     def __init__(self, prog=None, version=None, **kwargs):
         parser = argparse.ArgumentParser(prog, **kwargs)
         if version is not None:
@@ -180,12 +178,14 @@ class Program(SubProgram):
             self.parser.error("too few arguments")
 
         command = arg_map.pop(_DISPATCH_TO)
-        argspec = self._argspecs[command.__name__]
+        sig = self._signatures[command.__name__]
         real_args = []
-        for arg in argspec.args:
-            real_args.append(arg_map.pop(arg))
-        if arg_map and arg_map.get(argspec.varargs):
-            real_args.extend(arg_map.pop(argspec.varargs))
+        for name, arg in sig.parameters.items():
+            if arg.kind is arg.VAR_POSITIONAL:
+                if arg_map.get(name):
+                    real_args.extend(arg_map.pop(name))
+            else:
+                real_args.append(arg_map.pop(name))
         return command, real_args
 
     def execute(self, args):
