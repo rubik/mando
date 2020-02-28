@@ -105,8 +105,11 @@ class SubProgram(object):
                                                 help=cmd_help or None,
                                                 description=cmd_desc or None,
                                                 **kwargs)
-        params = find_param_docs(doc)
-        for a, kw in self._analyze_func(func, params, argz, argspec.varargs):
+
+        doc_params = find_param_docs(doc)
+        self._signatures[func_name] = signature(func)
+
+        for a, kw in self._analyze_func(func, doc_params):
             completer = kw.pop('completer', None)
             arg = subparser.add_argument(*a, **purify_kwargs(kw))
             if completer is not None:
@@ -115,7 +118,7 @@ class SubProgram(object):
         subparser.set_defaults(**{_DISPATCH_TO: func})
         return func
 
-    def _analyze_func(self, func, params, argz, varargs_name):
+    def _analyze_func(self, func, doc_params):
         '''Analyze the given function, merging default arguments, overridden
         arguments (with @arg) and parameters extracted from the docstring.
 
@@ -138,6 +141,9 @@ class SubProgram(object):
                 default = _POSITIONAL()
 
             opts, meta = doc_params.get(name, ([], {}))
+            # check docstring for type first, then type annotation
+            if meta.get('type', None) is None and param.annotation is not sig.empty:
+                meta['type'] = param.annotation
 
             override = overrides.get(name, ((), {}))
             yield merge(name, default, override, opts, meta)
