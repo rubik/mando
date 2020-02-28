@@ -46,7 +46,7 @@ class SubProgram(object):
         # also always provide help= to fix missing entry in command list
         help = kwd.pop('help', "{} subcommand".format(name))
         prog = SubProgram(self._subparsers.add_parser(name, help=help, **kwd),
-                          self._argspecs)
+                          self._signatures)
         # do not attempt to overwrite existing attributes
         assert not hasattr(self, name), "Invalid sub-prog name: " + name
         setattr(self, name, prog)
@@ -107,7 +107,7 @@ class SubProgram(object):
                                                 **kwargs)
 
         doc_params = find_param_docs(doc)
-        self._signatures[func_name] = signature(func)
+        self._signatures[func.__name__] = signature(func)
 
         for a, kw in self._analyze_func(func, doc_params):
             completer = kw.pop('completer', None)
