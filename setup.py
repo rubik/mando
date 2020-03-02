@@ -15,9 +15,9 @@ extras = {"restructuredText": ["rst2ansi"]}
 
 sversion = tuple(setuptools.__version__.split("."))
 
-if sversion > (36, 2):
+if sversion > ("36", "2"):
     deps += ['argparse ; python_version<="2.6"', 'funcsigs ; python_version<="3.2"']
-elif sversion > (18, 0):
+elif sversion > ("18", "0"):
     extras[':python_version<="3.2"'] = ["argparse"]
     extras[':python_version<="2.7"'] = ["funcsigs"]
 
