@@ -31,3 +31,4 @@ pip-log.txt
 nosetests.xml
 htmlcov
 .cache
+venv
