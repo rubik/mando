@@ -261,9 +261,9 @@ the hard-coded list of types permitted by the docstring method::
         main()
 
 .. code-block:: console
-    $ python3 ../test.py dup "test " 2
+    $ python3 test.py dup "test " 2
     test test test test
-    $ python3 ../test.py dup "test " foo
+    $ python3 test.py dup "test " foo
     usage: test.py dup [-h] string times
     test.py dup: error: argument times: invalid double_int value: 'foo'
 
