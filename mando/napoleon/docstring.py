@@ -11,7 +11,10 @@
     :license: BSD, see LICENSE for details.
 """
 
-import collections
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 import inspect
 import re
 
@@ -112,7 +115,7 @@ class GoogleDocstring(UnicodeMixin):
                 what = 'class'
             elif inspect.ismodule(obj):
                 what = 'module'
-            elif isinstance(obj, collections.Callable):  # type: ignore
+            elif isinstance(obj, Callable):  # type: ignore
                 what = 'function'
             else:
                 what = 'object'
