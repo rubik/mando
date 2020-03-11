@@ -143,7 +143,7 @@ class SubProgram(object):
 
             opts, meta = doc_params.get(name, ([], {}))
             # check docstring for type first, then type annotation
-            if meta.get('type', None) is None and param.annotation is not sig.empty:
+            if meta.get('type') is None and param.annotation is not sig.empty:
                 meta['type'] = param.annotation
 
             override = overrides.get(name, ((), {}))
