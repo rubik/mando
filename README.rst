@@ -158,6 +158,40 @@ Amazed uh? Yes, mando got the short options and the help from the docstring!
 You can put much more in the docstring, and if that isn't enough, there's an
 ``@arg`` decorator to customize the arguments that get passed to argparse.
 
+
+Type annotations
+----------------
+mando understands Python 3-style type annotations and will warn the user if the
+arguments given to a command are of the wrong type.
+
+.. code-block:: python3
+
+
+    from mando import command, main
+
+
+    @command
+    def duplicate(string, times: int):
+        '''Duplicate text.
+
+        :param string: The text to duplicate.
+        :param times: How many times to duplicate.'''
+
+        print(string * times)
+
+
+    if __name__ == '__main__':
+        main()
+
+.. code-block:: console
+
+    $ python3 test.py duplicate "test " 5
+    test test test test test
+    $ python3 test.py duplicate "test " foo
+    usage: test.py duplicate [-h] string times
+    test.py dup: error: argument times: invalid int value: 'foo'
+
+
 Mando has lots of other options. For example, it supports different docstring
 styes (Sphinx, Google and NumPy), supports shell autocompletion via the
 ``argcomplete`` package and supports custom format classes. For a complete
