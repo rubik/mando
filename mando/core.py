@@ -126,7 +126,8 @@ class SubProgram(object):
         :param doc_params: Parameters extracted from docstring.
         '''
 
-        sig = signature(func)
+        # prevent unnecessary inspect calls
+        sig = self._signatures.get(func.__name__) or signature(func)
         overrides = getattr(func, '_argopts', {})
         for name, param in sig.parameters.items():
 
