@@ -123,7 +123,7 @@ class SubProgram(object):
         arguments (with @arg) and parameters extracted from the docstring.
 
         :param func: The function to analyze.
-        :param params: Parameters extracted from docstring.
+        :param doc_params: Parameters extracted from docstring.
         '''
 
         sig = signature(func)
