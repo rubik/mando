@@ -233,6 +233,40 @@ Actual usage::
     $ python types.py pow 5 8 -m 8
     1.0
 
+Adding *type* in the signature
+------------------------------
+
+If running Python 3, mando can use type annotations to convert argument types.
+Since type annotations can be any callable, this allows more flexibility than
+the hard-coded list of types permitted by the docstring method::
+    from mando import command, main
+
+    # Note: don't actually do this.
+    def double_int(n):
+        return int(n) * 2
+
+
+    @command
+    def dup(string, times: double_int):
+        """
+        Duplicate text.
+
+        :param string: The text to duplicate.
+        :param times: How many times to duplicate.
+        """
+        print(string * times)
+
+
+    if __name__ == "__main__":
+        main()
+
+.. code-block:: console
+    $ python3 test.py dup "test " 2
+    test test test test
+    $ python3 test.py dup "test " foo
+    usage: test.py dup [-h] string times
+    test.py dup: error: argument times: invalid double_int value: 'foo'
+
 
 Overriding arguments with ``@arg``
 ----------------------------------

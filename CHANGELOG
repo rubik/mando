@@ -1,0 +1,7 @@
+0.7.0 (Mar 11, 2020)
+--------------------
+
+- Switch from inspect.getargspec to inspect.signature (@acetylen): #47
+- Add support for type annotations (@acetylen): #47
+- Add support for Python 3.7 and 3.8 (@acetylen): #47
+- Remove support for Python 2.6 and 3.4 (@acetylen): #47

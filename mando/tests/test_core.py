@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import pytest
 from mando import Program
 
@@ -93,6 +94,21 @@ def more_power(x, y=2):
     return x ** y
 
 
+@program.command
+def repeat(what, times=10):
+    '''Getting types from annotations.
+
+    :param what: what to repeat.
+    :param -t, --times: how many times to repeat.'''
+
+    return what * times
+
+
+# version-agnostic way of setting annotations.
+# Equivalent to 'repeat(what: str, times: int=10)'
+repeat.__annotations__ = {'what': str, 'times': int}
+
+
 @program.command('more-powerful')
 @program.arg('x', type=int, completer=NoopCompleter)
 @program.arg('y', '-y', '--epsilon', type=int)
@@ -185,6 +201,8 @@ PROGRAM_EXECUTE_CASES = [
     ('overriding 2 -y 7', -5),
     ('dashes 2', 32),
     ('dashes 7 -b 3', 343),
+    ('repeat a', 'aaaaaaaaaa'),
+    ('repeat a -t 5', 'aaaaa'),
 ]
 
 
@@ -193,6 +211,27 @@ def test_program_execute(args, result):
     args = args.split()
     assert result == program.execute(args)
     assert program.parse(args)[0].__name__ == program._current_command
+
+
+@contextmanager
+def does_not_raise():
+    yield
+
+
+PROGRAM_EXCEPT_CASES = [
+    ('repeat a', does_not_raise()),
+    ('repeat a -t blah', pytest.raises(SystemExit)),
+]
+
+
+@pytest.mark.parametrize('args,expectation', PROGRAM_EXCEPT_CASES)
+def test_program_except(args, expectation):
+    args = args.split()
+
+    with expectation:
+        program.execute(args)
+
+        assert program.parse(args)[0].__name__ == program._current_command
 
 
 PROGRAM_OPTIONS_CASES = [

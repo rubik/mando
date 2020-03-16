@@ -20,6 +20,7 @@ develop-eggs
 lib
 lib64
 __pycache__
+.mypy_cache
 
 # Installer logs
 pip-log.txt
@@ -30,3 +31,4 @@ pip-log.txt
 nosetests.xml
 htmlcov
 .cache
+venv

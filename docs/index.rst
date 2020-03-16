@@ -30,7 +30,7 @@ This example should showcase most of mando's features::
 
 
     @arg('maxdepth', metavar='<levels>')
-    def find(path, pattern, maxdepth=None, P=False, D=None):
+    def find(path, pattern, maxdepth: int = None, P=False, D=None):
         '''Mock some features of the GNU find command.
 
         This is not at all a complete program, but a simple representation to
@@ -38,7 +38,7 @@ This example should showcase most of mando's features::
 
         :param path: The starting path.
         :param pattern: The pattern to look for.
-        :param -d, --maxdepth <int>: Descend at most <levels>.
+        :param -d, --maxdepth: Descend at most <levels>.
         :param -P: Do not follow symlinks.
         :param -D <debug-opt>: Debug option, print diagnostic information.'''
 
@@ -54,10 +54,10 @@ This example should showcase most of mando's features::
     if __name__ == '__main__':
         main()
 
-mando extracts information from your command's docstring. So you can document
-your code and create the CLI application at once! In the above example the
-Sphinx format is used, but mando does not force you to write ReST docstrings.
-Currently, it supports the following styles:
+mando extracts information from your command's signature and docstring, so you 
+can document your code and create the CLI application at once! In the above
+example the Sphinx format is used, but mando does not force you to write
+ReST docstrings. Currently, it supports the following styles:
 
 - Sphinx (the default one)
 - Google
@@ -143,6 +143,11 @@ let's check the program itself:
     $ python gnu.py find --maxdepth 4 .
     usage: gnu.py find [-h] [-d <levels>] [-P] [-D <debug-opt>] path pattern
     gnu.py find: error: too few arguments
+    $ python gnu.py find -d "four" . filename
+    usage: gnu.py find [-h] [-d <levels>] [-P] [-D <debug-opt>] path pattern
+    gnu.py find: error: argument maxlevels: invalid int value: 'four'
+    
+    
 
 Contents
 --------
