@@ -36,6 +36,7 @@ Installation
 ------------
 
 .. code-block:: console
+
     $ pip install mando
 
 The problem
@@ -173,6 +174,7 @@ mando understands Python 3-style type annotations and will warn the user if the
 arguments given to a command are of the wrong type.
 
 .. code-block:: python
+
     from mando import command, main
 
 
