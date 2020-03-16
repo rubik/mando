@@ -1,4 +1,4 @@
-0.7.0 (Mar 11, 2020)
+0.7.0 (Mar 16, 2020)
 --------------------
 
 - Switch from inspect.getargspec to inspect.signature (@acetylen): #47
