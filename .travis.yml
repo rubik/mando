@@ -1,17 +1,16 @@
 language: python
 python:
-    - "2.6"
     - "2.7"
-    - "3.3"
-    - "3.4"
     - "3.5"
     - "3.6"
+    - "3.7"
+    - "3.8"
     - "pypy"
+    - "pypy3"
 install:
     - pip install -U pip
     - pip install -e .
     - pip install -r test_requirements.pip
-    - ./install-26-deps.sh
 script:
     - make tests
     - make cov

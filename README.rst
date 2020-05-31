@@ -1,25 +1,33 @@
 mando: CLI interfaces for Humans!
 =================================
 
-.. image:: https://img.shields.io/travis/rubik/mando/master.svg
+.. image:: https://img.shields.io/travis/rubik/mando
     :alt: Travis-CI badge
     :target: https://travis-ci.org/rubik/mando
 
-.. image:: https://img.shields.io/coveralls/rubik/mando/master.svg
+.. image:: https://img.shields.io/coveralls/rubik/mando
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/mando
 
-.. image:: https://img.shields.io/pypi/v/mando.svg
+.. image:: https://img.shields.io/pypi/implementation/mando?label=%20&logo=python&logoColor=white
+    :alt: PyPI - Implementation
+
+.. image:: https://img.shields.io/pypi/v/mando
     :alt: Latest release
     :target: https://pypi.python.org/pypi/mando
 
-.. image:: https://img.shields.io/pypi/format/mando.svg
+.. image:: https://img.shields.io/pypi/l/mando
+    :alt: PyPI - License
+    :target: https://pypi.org/project/mando/
+
+.. image:: https://img.shields.io/pypi/pyversions/mando
+    :alt: PyPI - Python Version
+    :target: https://pypi.org/project/mando/
+
+.. image:: https://img.shields.io/pypi/format/mando
     :alt: Download format
     :target: http://pythonwheels.com/
 
-.. image:: https://img.shields.io/pypi/l/mando.svg
-    :alt: Mando license
-    :target: https://pypi.python.org/pypi/mando/
 
 mando is a wrapper around ``argparse``, and allows you to write complete CLI
 applications in seconds while maintaining all the flexibility.
@@ -27,8 +35,7 @@ applications in seconds while maintaining all the flexibility.
 Installation
 ------------
 
-Mando is tested across all Python versions from **Python 2.6** to **Python
-3.6** and also on **Pypy**. You can install it with Pip::
+.. code-block:: console
 
     $ pip install mando
 
@@ -48,6 +55,7 @@ Quickstart
 
     @command
     def echo(text, capitalize=False):
+        '''Echo the given text.'''
         if capitalize:
             text = text.upper()
         print(text)
@@ -158,7 +166,41 @@ Amazed uh? Yes, mando got the short options and the help from the docstring!
 You can put much more in the docstring, and if that isn't enough, there's an
 ``@arg`` decorator to customize the arguments that get passed to argparse.
 
+
+Type annotations
+----------------
+
+mando understands Python 3-style type annotations and will warn the user if the
+arguments given to a command are of the wrong type.
+
+.. code-block:: python
+
+    from mando import command, main
+
+
+    @command
+    def duplicate(string, times: int):
+        '''Duplicate text.
+
+        :param string: The text to duplicate.
+        :param times: How many times to duplicate.'''
+
+        print(string * times)
+
+
+    if __name__ == '__main__':
+        main()
+
+.. code-block:: console
+
+    $ python3 test.py duplicate "test " 5
+    test test test test test
+    $ python3 test.py duplicate "test " foo
+    usage: test.py duplicate [-h] string times
+    test.py duplicate: error: argument times: invalid int value: 'foo'
+
+
 Mando has lots of other options. For example, it supports different docstring
-styes (Sphinx, Google and NumPy), supports shell autocompletion via the
+styles (Sphinx, Google and NumPy), supports shell autocompletion via the
 ``argcomplete`` package and supports custom format classes. For a complete
 documentation, visit https://mando.readthedocs.org/.
