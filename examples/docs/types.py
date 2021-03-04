@@ -1,13 +1,14 @@
-from mando import command, main
+from mando import command, main, arg
 
 
 @command
+@arg("mod", "-m", "--mod")
 def pow(a, b, mod=None):
-    '''Mimic Python's pow() function.
+    """Mimic Python's pow() function.
 
-    :param a <float>: The base.
-    :param b <float>: The exponent.
-    :param -m, --mod <int>: Modulus.'''
+    :param float a: The base.
+    :param float b: The exponent.
+    :param int mod: Modulus."""
 
     if mod is not None:
         print((a ** b) % mod)
@@ -15,5 +16,5 @@ def pow(a, b, mod=None):
         print(a ** b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

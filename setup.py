@@ -9,7 +9,7 @@ except ImportError as e:
 else:
     version = mando.__version__
 
-deps = ["six"]
+deps = ["six", "docstring_parser"]
 extras = {"restructuredText": ["rst2ansi"]}
 
 

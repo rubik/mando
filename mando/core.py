@@ -1,23 +1,29 @@
-'''Main module containing the class Program(), which allows the conversion from
+"""Main module containing the class Program(), which allows the conversion from
 ordinary Python functions into commands for the command line. It uses
-:py:module:``argparse`` behind the scenes.'''
+:py:module:``argparse`` behind the scenes."""
 
 import argparse
 import inspect
 import sys
 
-from mando.napoleon import Config, GoogleDocstring, NumpyDocstring
+from mando.utils import action_by_type, ensure_dashes, purify_kwargs
 
-from mando.utils import (purify_doc, action_by_type, find_param_docs,
-                         split_doc, ensure_dashes, purify_kwargs)
 try:
     from inspect import signature
 except ImportError:
     from funcsigs import signature
 
+from docstring_parser import parse
 
-_POSITIONAL = type('_positional', (object,), {})
-_DISPATCH_TO = '_dispatch_to'
+_POSITIONAL = type("_positional", (object,), {})
+_DISPATCH_TO = "_dispatch_to"
+
+known_types = {
+    "int": int,
+    "float": float,
+    "str": str,
+    None: None,
+}
 
 
 class SubProgram(object):
@@ -32,9 +38,10 @@ class SubProgram(object):
 
     # Add global script options.
     def option(self, *args, **kwd):
-        assert args and all(arg.startswith('-') for arg in args), \
-            "Positional arguments not supported here"
-        completer = kwd.pop('completer', None)
+        assert args and all(
+            arg.startswith("-") for arg in args
+        ), "Positional arguments not supported here"
+        completer = kwd.pop("completer", None)
         arg = self.parser.add_argument(*args, **kwd)
         if completer is not None:
             arg.completer = completer
@@ -44,73 +51,92 @@ class SubProgram(object):
 
     def add_subprog(self, name, **kwd):
         # also always provide help= to fix missing entry in command list
-        help = kwd.pop('help', "{} subcommand".format(name))
-        prog = SubProgram(self._subparsers.add_parser(name, help=help, **kwd),
-                          self._signatures)
+        help = kwd.pop("help", "{} subcommand".format(name))
+        prog = SubProgram(
+            self._subparsers.add_parser(name, help=help, **kwd), self._signatures
+        )
         # do not attempt to overwrite existing attributes
         assert not hasattr(self, name), "Invalid sub-prog name: " + name
         setattr(self, name, prog)
         return prog
 
     def command(self, *args, **kwargs):
-        '''A decorator to convert a function into a command. It can be applied
+        """A decorator to convert a function into a command. It can be applied
         as ``@command`` or as ``@command(new_name)``, specifying an alternative
-        name for the command (default one is ``func.__name__``).'''
-        if len(args) == 1 and hasattr(args[0], '__call__'):
+        name for the command (default one is ``func.__name__``)."""
+        if len(args) == 1 and hasattr(args[0], "__call__"):
             return self._generate_command(args[0])
         else:
+
             def _command(func):
                 return self._generate_command(func, *args, **kwargs)
+
             return _command
 
     def arg(self, param, *args, **kwargs):
-        '''A decorator to override the parameters extracted from the docstring
+        """A decorator to override the parameters extracted from the docstring
         or to add new ones.
 
         :param param: The parameter's name. It must be among the function's
-            arguments names.'''
+            arguments names."""
+
         def wrapper(func):
-            if not hasattr(func, '_argopts'):
+            if not hasattr(func, "_argopts"):
                 func._argopts = {}
             func._argopts[param] = (args, kwargs)
             return func
+
         return wrapper
 
-    def _generate_command(self, func, name=None, doctype='rest',
-                          *args, **kwargs):
-        '''Generate argparse's subparser.
+    def _generate_command(self, func, name=None, *args, **kwargs):
+        """Generate argparse's subparser.
 
         :param func: The function to analyze.
         :param name: If given, a different name for the command. The default
-            one is ``func.__name__``.'''
+            one is ``func.__name__``."""
+
+        # The "doctype" keyword is ignored.
+        if "doctype" in kwargs:
+            kwargs.pop("doctype")
 
         name = name or func.__name__
-        doc = (inspect.getdoc(func) or '').strip() + '\n'
+        doc = (inspect.getdoc(func) or "").strip() + "\n"
 
-        if doctype == 'numpy':
-            config = Config(napoleon_google_docstring=False,
-                            napoleon_use_rtype=False)
-            doc = str(NumpyDocstring(doc, config))
-        elif doctype == 'google':
-            config = Config(napoleon_numpy_docstring=False,
-                            napoleon_use_rtype=False)
-            doc = str(GoogleDocstring(doc, config))
-        elif doctype == 'rest':
-            pass
-        else:
-            raise ValueError('doctype must be one of "numpy", "google", '
-                             'or "rest"')
-        cmd_help, cmd_desc = split_doc(purify_doc(doc))
-        subparser = self._subparsers.add_parser(name,
-                                                help=cmd_help or None,
-                                                description=cmd_desc or None,
-                                                **kwargs)
+        doc = parse(doc)
 
-        doc_params = find_param_docs(doc)
+        cmd_help, cmd_desc = doc.short_description, doc.long_description
+        if cmd_desc is None:
+            cmd_desc = cmd_help
+        subparser = self._subparsers.add_parser(
+            name, help=cmd_help or None, description=cmd_desc or None, **kwargs
+        )
+
+        # Example entry in doc_parms:
+        #
+        # 'start_date': (['start_date'],
+        #                {'metavar': None,
+        #                 'type': <class 'str'>,
+        #                 'help': "[optional, defaults to first date ...",
+        #                 }
+        #               )
+        doc_params = {}
+        for i in doc.params:
+            doc_params[i.arg_name] = (
+                [i.arg_name],
+                {
+                    "metavar": "<{0}>".format(i.type_name),
+                    "type": known_types.get(i.type_name, None),
+                    "help": i.description,
+                },
+            )
+
         self._signatures[func.__name__] = signature(func)
 
         for a, kw in self._analyze_func(func, doc_params):
-            completer = kw.pop('completer', None)
+            completer = kw.pop("completer", None)
+            # if there is an "action", then can only have
+            # "option_strings", "dest", "default", "required", and "help"
+            # keywords.
             arg = subparser.add_argument(*a, **purify_kwargs(kw))
             if completer is not None:
                 arg.completer = completer
@@ -119,20 +145,20 @@ class SubProgram(object):
         return func
 
     def _analyze_func(self, func, doc_params):
-        '''Analyze the given function, merging default arguments, overridden
+        """Analyze the given function, merging default arguments, overridden
         arguments (with @arg) and parameters extracted from the docstring.
 
         :param func: The function to analyze.
         :param doc_params: Parameters extracted from docstring.
-        '''
+        """
 
         # prevent unnecessary inspect calls
         sig = self._signatures.get(func.__name__) or signature(func)
-        overrides = getattr(func, '_argopts', {})
+        overrides = getattr(func, "_argopts", {})
         for name, param in sig.parameters.items():
 
             if param.kind is param.VAR_POSITIONAL:
-                kwargs = {'nargs': '*'}
+                kwargs = {"nargs": "*"}
                 kwargs.update(doc_params.get(name, (None, {}))[1])
                 yield ([name], kwargs)
                 continue
@@ -143,8 +169,8 @@ class SubProgram(object):
 
             opts, meta = doc_params.get(name, ([], {}))
             # check docstring for type first, then type annotation
-            if meta.get('type') is None and param.annotation is not sig.empty:
-                meta['type'] = param.annotation
+            if meta.get("type") is None and param.annotation is not sig.empty:
+                meta["type"] = param.annotation
 
             override = overrides.get(name, ((), {}))
             yield merge(name, default, override, opts, meta)
@@ -154,8 +180,7 @@ class Program(SubProgram):
     def __init__(self, prog=None, version=None, **kwargs):
         parser = argparse.ArgumentParser(prog, **kwargs)
         if version is not None:
-            parser.add_argument('-v', '--version', action='version',
-                                version=version)
+            parser.add_argument("-v", "--version", action="version", version=version)
 
         super(Program, self).__init__(parser, dict())
         self._options = None
@@ -166,14 +191,15 @@ class Program(SubProgram):
         return getattr(self._options, attr)
 
     def parse(self, args):
-        '''Parse the given arguments and return a tuple ``(command, args)``,
+        """Parse the given arguments and return a tuple ``(command, args)``,
         where ``args`` is a list consisting of all arguments. The command can
         then be called as ``command(*args)``.
 
-        :param args: The arguments to parse.'''
+        :param args: The arguments to parse."""
         try:
             # run completion handler before parsing
             import argcomplete
+
             argcomplete.autocomplete(self.parser)
         except ImportError:  # pragma: no cover
             # ignore error if not installed
@@ -196,34 +222,34 @@ class Program(SubProgram):
         return command, real_args
 
     def execute(self, args):
-        '''Parse the arguments and execute the resulting command.
+        """Parse the arguments and execute the resulting command.
 
-        :param args: The arguments to parse.'''
+        :param args: The arguments to parse."""
         command, a = self.parse(args)
         self._current_command = command.__name__
         return command(*a)
 
     def __call__(self):  # pragma: no cover
-        '''Parse ``sys.argv`` and execute the resulting command.'''
+        """Parse ``sys.argv`` and execute the resulting command."""
         return self.execute(sys.argv[1:])
 
 
 def merge(arg, default, override, args, kwargs):
-    '''Merge all the possible arguments into a tuple and a dictionary.
+    """Merge all the possible arguments into a tuple and a dictionary.
 
     :param arg: The argument's name.
     :param default: The argument's default value or an instance of _POSITIONAL.
     :param override: A tuple containing (args, kwargs) given to @arg.
     :param args: The arguments extracted from the docstring.
-    :param kwargs: The keyword arguments extracted from the docstring.'''
+    :param kwargs: The keyword arguments extracted from the docstring."""
     opts = [arg]
     if not isinstance(default, _POSITIONAL):
         opts = list(ensure_dashes(args or opts))
-        kwargs.update({'default': default, 'dest': arg})
+        kwargs.update({"default": default, "dest": arg})
         kwargs.update(action_by_type(default))
     else:
         # positionals can't have a metavar, otherwise the help is screwed
         # if one really wants the metavar, it can be added with @arg
-        kwargs['metavar'] = None
+        kwargs["metavar"] = None
     kwargs.update(override[1])
     return override[0] or opts, kwargs
