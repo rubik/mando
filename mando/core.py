@@ -121,11 +121,16 @@ class SubProgram(object):
         #               )
         doc_params = {}
         for i in doc.params:
+            typ = known_types.get(i.type_name, None)
+            if typ is None:
+                meta = None
+            else:
+                meta = "<{0}>".format(i.type_name)
             doc_params[i.arg_name] = (
                 [i.arg_name],
                 {
-                    "metavar": "<{0}>".format(i.type_name),
-                    "type": known_types.get(i.type_name, None),
+                    "metavar": meta,
+                    "type": typ,
                     "help": i.description,
                 },
             )
