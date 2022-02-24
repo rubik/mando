@@ -239,6 +239,7 @@ Adding *type* in the signature
 If running Python 3, mando can use type annotations to convert argument types.
 Since type annotations can be any callable, this allows more flexibility than
 the hard-coded list of types permitted by the docstring method::
+
     from mando import command, main
 
     # Note: don't actually do this.
@@ -261,6 +262,7 @@ the hard-coded list of types permitted by the docstring method::
         main()
 
 .. code-block:: console
+
     $ python3 test.py dup "test " 2
     test test test test
     $ python3 test.py dup "test " foo
