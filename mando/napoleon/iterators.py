@@ -14,7 +14,7 @@
 import collections
 
 
-class peek_iter(object):
+class peek_iter:
     """An iterator object that supports peeking ahead.
 
     Parameters
