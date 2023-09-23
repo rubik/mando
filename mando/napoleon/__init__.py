@@ -9,12 +9,10 @@
     :license: BSD, see LICENSE for details.
 """
 
-from six import iteritems
-
 from mando.napoleon.docstring import GoogleDocstring, NumpyDocstring
 
 
-class Config(object):
+class Config:
     """Sphinx napoleon extension settings in `conf.py`.
 
     Listed below are all the settings used by napoleon and their default
@@ -252,7 +250,7 @@ class Config(object):
 
     def __init__(self, **settings):
         # type: (Any) -> None
-        for name, (default, rebuild) in iteritems(self._config_values):
+        for name, (default, rebuild) in self._config_values.items():
             setattr(self, name, default)
-        for name, value in iteritems(settings):
+        for name, value in settings.items():
             setattr(self, name, value)

@@ -9,16 +9,15 @@ except ImportError as e:
 else:
     version = mando.__version__
 
-deps = ["six"]
+deps = []
 extras = {"restructuredText": ["rst2ansi"]}
 
 
 sversion = tuple(setuptools.__version__.split("."))
 
 if sversion > ("36", "2"):
-    deps += ['argparse ; python_version<="2.6"', 'funcsigs ; python_version<="3.2"']
+    deps += ['funcsigs ; python_version<="3.2"']
 elif sversion > ("18", "0"):
-    extras[':python_version<="2.6"'] = ["argparse"]
     extras[':python_version<="3.2"'] = ["funcsigs"]
 
 
@@ -51,8 +50,6 @@ setuptools.setup(
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.1",
         "Programming Language :: Python :: 3.2",

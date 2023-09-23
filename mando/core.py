@@ -5,22 +5,19 @@ ordinary Python functions into commands for the command line. It uses
 import argparse
 import inspect
 import sys
+from inspect import signature
 
 from mando.napoleon import Config, GoogleDocstring, NumpyDocstring
 
 from mando.utils import (purify_doc, action_by_type, find_param_docs,
                          split_doc, ensure_dashes, purify_kwargs)
-try:
-    from inspect import signature
-except ImportError:
-    from funcsigs import signature
 
 
 _POSITIONAL = type('_positional', (object,), {})
 _DISPATCH_TO = '_dispatch_to'
 
 
-class SubProgram(object):
+class SubProgram:
     def __init__(self, parser, signatures):
         self.parser = parser
         self._subparsers = self.parser.add_subparsers()

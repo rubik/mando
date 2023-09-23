@@ -1,11 +1,6 @@
 __version__ = '0.7.1'
 
-try:
-    from mando.core import Program
-except ImportError as e:  # pragma: no cover
-    # unfortunately the only workaround for Python2.6, argparse and setup.py
-    e.version = __version__
-    raise e
+from mando.core import Program
 
 main = Program()
 command = main.command
