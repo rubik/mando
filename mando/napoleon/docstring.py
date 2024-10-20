@@ -11,15 +11,9 @@
     :license: BSD, see LICENSE for details.
 """
 
-try:
-    from collections.abc import Callable
-except ImportError:
-    from collections import Callable
+from collections.abc import Callable
 import inspect
 import re
-
-from six import string_types, u
-from six.moves import range
 
 from mando.napoleon.iterators import modify_iter
 from mando.napoleon.pycompat import UnicodeMixin
@@ -124,7 +118,7 @@ class GoogleDocstring(UnicodeMixin):
         self._name = name
         self._obj = obj
         self._opt = options
-        if isinstance(docstring, string_types):
+        if isinstance(docstring, str):
             docstring = docstring.splitlines()
         self._lines = docstring
         self._line_iter = modify_iter(docstring, modifier=lambda s: s.rstrip())
@@ -323,13 +317,13 @@ class GoogleDocstring(UnicodeMixin):
     def _fix_field_desc(self, desc):
         # type: (List[unicode]) -> List[unicode]
         if self._is_list(desc):
-            desc = [u''] + desc
+            desc = [''] + desc
         elif desc[0].endswith('::'):
             desc_block = desc[1:]
             indent = self._get_indent(desc[0])
             block_indent = self._get_initial_indent(desc_block)
             if block_indent > indent:
-                desc = [u''] + desc
+                desc = [''] + desc
             else:
                 desc = ['', desc[0]] + self._indent(desc_block, 4)
         return desc
@@ -341,9 +335,9 @@ class GoogleDocstring(UnicodeMixin):
             return ['.. %s:: %s' % (admonition, lines[0].strip()), '']
         elif lines:
             lines = self._indent(self._dedent(lines), 3)
-            return [u'.. %s::' % admonition, u''] + lines + [u'']
+            return ['.. %s::' % admonition, ''] + lines + ['']
         else:
-            return [u'.. %s::' % admonition, u'']
+            return ['.. %s::' % admonition, '']
 
     def _format_block(self, prefix, lines, padding=None):
         # type: (unicode, List[unicode], unicode) -> List[unicode]
@@ -614,7 +608,7 @@ class GoogleDocstring(UnicodeMixin):
         for _name, _, _desc in self._consume_fields(parse_type=False):
             lines.append('.. method:: %s' % _name)
             if _desc:
-                lines.extend([u''] + self._indent(_desc, 3))
+                lines.extend([''] + self._indent(_desc, 3))
             lines.append('')
         return lines
 
@@ -924,7 +918,7 @@ class NumpyDocstring(GoogleDocstring):
         # type: () -> bool
         section, underline = self._line_iter.peek(2)
         section = section.lower()
-        if section in self._sections and isinstance(underline, string_types):
+        if section in self._sections and isinstance(underline, str):
             return bool(_numpy_section_regex.match(underline))  # type: ignore
         elif self._directive_sections:
             if _directive_regex.match(section):

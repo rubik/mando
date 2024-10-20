@@ -1,6 +1,3 @@
-# This is important: it will make all literals unicode under 2.x
-from __future__ import unicode_literals
-
 import unittest
 
 from mando import Program

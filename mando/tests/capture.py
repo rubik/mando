@@ -8,12 +8,7 @@ Capture function
 
 import sys
 from contextlib import contextmanager
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
-
+from io import StringIO
 
 @contextmanager
 def capture_sys_output():
