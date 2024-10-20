@@ -13,14 +13,6 @@ deps = []
 extras = {"restructuredText": ["rst2ansi"]}
 
 
-sversion = tuple(setuptools.__version__.split("."))
-
-if sversion > ("36", "2"):
-    deps += ['funcsigs ; python_version<="3.2"']
-elif sversion > ("18", "0"):
-    extras[':python_version<="3.2"'] = ["funcsigs"]
-
-
 with open(os.path.join(os.path.dirname(__file__), "README.rst")) as fobj:
     readme = fobj.read()
 
