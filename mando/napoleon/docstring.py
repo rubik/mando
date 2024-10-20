@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     sphinx.ext.napoleon.docstring
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -165,7 +164,7 @@ class GoogleDocstring(UnicodeMixin):
             Unicode version of the docstring.
 
         """
-        return u('\n').join(self.lines())
+        return '\n'.join(self.lines())
 
     def lines(self):
         # type: () -> List[unicode]
